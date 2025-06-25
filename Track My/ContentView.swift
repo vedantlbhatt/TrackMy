@@ -31,6 +31,8 @@ struct ContentView: View {
 struct FileReportView: View {
     @State private var selectedImages: [PhotosPickerItem] = []
     @State private var uiImages: [UIImage] = []
+    @State private var radius: Double = 10000.0
+    @State private var position: MapCameraPosition  = MapCameraPosition.camera(MapCamera(centerCoordinate: CLLocationCoordinate2D(latitude: 41.416775, longitude: 2.16), distance: 1000, heading: 0, pitch: 0))
     
     var body: some View {
         VStack {
@@ -78,6 +80,13 @@ struct FileReportView: View {
                     }
                 }
             }
+            
+            Map(position: $position) {
+                MapCircle(center: CLLocationCoordinate2D(latitude: 41.416775, longitude: 216), radius: radius)
+            }
+                .frame(minWidth: 50, maxWidth: 350, minHeight: 50, maxHeight: 350, alignment: .bottomTrailing)
+                .cornerRadius(50.0)
+            
         }
         .padding()
     }
