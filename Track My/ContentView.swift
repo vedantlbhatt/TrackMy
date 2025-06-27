@@ -31,12 +31,16 @@ struct ContentView: View {
 struct FileReportView: View {
     @State private var selectedImages: [PhotosPickerItem] = []
     @State private var uiImages: [UIImage] = []
-    @State private var radius: Double = 10000.0
+    @State private var radius: Double = 50
     @State private var position: MapCameraPosition  = MapCameraPosition.camera(MapCamera(centerCoordinate: CLLocationCoordinate2D(latitude: 41.416775, longitude: 2.16), distance: 1000, heading: 0, pitch: 0))
+    @State private var coordinate: CLLocationCoordinate2D?
+    //@State private var location: CGPoint = .zero
+    
     
     var body: some View {
         VStack {
             
+
             Text("Enter Details Here")
             
             Button("Add Last Known Location", action: {
@@ -67,8 +71,6 @@ struct FileReportView: View {
                     }
                 }
             }
-
-        
             ScrollView(.horizontal) {
                 HStack {
                     ForEach(uiImages, id: \.self) { img in
@@ -80,13 +82,26 @@ struct FileReportView: View {
                     }
                 }
             }
-            
-            Map(position: $position) {
-                MapCircle(center: CLLocationCoordinate2D(latitude: 41.416775, longitude: 216), radius: radius)
+            MapReader { proxy in
+                Map(position: $position) {
+                    MapCircle(center: coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0), radius: radius)
+                        .foregroundStyle(.blue.opacity(0.3))
+                        .mapOverlayLevel(level: .aboveRoads)
+                }
+                .onTapGesture { location in
+                    coordinate = proxy.convert(location, from: .local)
+                }
             }
                 .frame(minWidth: 50, maxWidth: 350, minHeight: 50, maxHeight: 350, alignment: .bottomTrailing)
                 .cornerRadius(50.0)
             
+            Slider(value: $radius, in: 0...100)
+            
+            Button("Submit Report", action: {
+                
+            })
+            
+        
         }
         .padding()
     }
