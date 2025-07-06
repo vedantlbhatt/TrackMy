@@ -1,0 +1,6 @@
+torch
+faiss
+numpy
+transformers
+Image
+io
