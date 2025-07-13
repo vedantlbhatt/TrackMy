@@ -2,7 +2,7 @@ import os
 
 class Settings:
     PROJECT_NAME: str = "TrackMy"
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = "/api"
     
     MYSQL_USER: str = os.getenv("MYSQL_USER")
     MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD")
