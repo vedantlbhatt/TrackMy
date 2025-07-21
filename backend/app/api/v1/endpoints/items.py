@@ -19,7 +19,7 @@ def get_item_by_user(user_id: int, item_id: int):
     return item_store.get_item_by_user(user_id, item_id)
 
 @router.get("getItemsByUser/userId/{user_id}")
-def get_item_by_user(user_id: int):
+def get_items_by_user(user_id: int):
     return item_store.get_items_by_user(user_id)
     
 @router.post("addItemByUser/userId/{user_id}/itemId/{item_id}")
