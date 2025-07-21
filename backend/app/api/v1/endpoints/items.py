@@ -14,7 +14,10 @@ def get_db():
     finally:
         db.close()
 
-@router.get("getItemByUser/{user_id}{item_id}")
+@router.get("getItemByUser/userId/{user_id}/itemId/{item_id}")
 def get_user_by_id(user_id: int, item_id: int):
     return item_store.get_item_by_user(user_id, item_id)
     
+@router.post("addItemByUser/userId/{user_id}/itemId/{item_id}")
+def get_items_by_user(user_id: int):
+    return item_store.get_items_by_user(user_id)

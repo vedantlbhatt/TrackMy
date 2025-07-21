@@ -21,4 +21,6 @@ class item_store:
 
     def get_item_by_user(db, user_id, item_id):
         return db.query(Item).filter(Item.id == item_id, Item.user_id == user_id).first()
-
+    
+    def get_items_by_user(db, user_id):
+        return db.query(Item).filter(Item.user_id == user_id).all()
