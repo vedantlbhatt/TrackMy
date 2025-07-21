@@ -6,3 +6,6 @@ def create_user(db, email, user_name, payment_source):
     db.commit()
     db.refresh(user)
     return user
+
+def get_user_by_id(db, user_id):
+     return db.query(User).filter(User.id == user_id).first()
