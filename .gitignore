@@ -8,4 +8,4 @@ android/.gradle/
 android/.idea/
 .env
 bvenv/
-__pycache__/
+**/__pycache__/

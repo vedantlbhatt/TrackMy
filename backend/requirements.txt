@@ -4,3 +4,10 @@ numpy
 transformers
 Image
 io
+fastapi
+uvicorn[standard]
+sqlalchemy
+pymysql
+python-dotenv
+pydantic
+cryptography
