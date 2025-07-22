@@ -9,3 +9,6 @@ class Image(Base):
     item_id = Column(Integer, ForeignKey("items.item_id"), unique=True, nullable=False)
 
     item = relationship("Item", back_populates="image")
+    
+    # Currently flow goes Item->Image->Embedding
+    

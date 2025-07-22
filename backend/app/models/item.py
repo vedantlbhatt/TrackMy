@@ -10,3 +10,6 @@ class Item(Base):
     
     user = relationship("User", back_populates="items")
     image = relationship("Image", back_populates="item", uselist=False)
+    
+    # Currently flow goes Item->Image->Embedding
+    # As such, Embedding would theoretically have the most information, but it should only backpopulate to Image
