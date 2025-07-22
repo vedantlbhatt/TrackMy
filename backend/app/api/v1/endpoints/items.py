@@ -24,5 +24,5 @@ def get_items_by_user(user_id: int, db=Depends(get_db)):
     return item_store.get_items_by_user(db, user_id)
     
 @router.post("/addItemByUser/")
-def get_items_by_user(user_id: int, name: str,  db=Depends(get_db)):
+def add_item_by_user(user_id: int, name: str,  db=Depends(get_db)):
     return item_store.create_item(db, user_id, name)
