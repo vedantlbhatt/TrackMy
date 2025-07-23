@@ -17,6 +17,7 @@ def get_db():
 def add_user(email: str, user_name: str, payment_source: str, db=Depends(get_db)):
     return user_store.create_user(db, email, user_name, payment_source)
 
-@router.get("getUser/{user_id}")
-def get_user(user_id: int):
-    return user_store.get_user_by_id(user_id, db=Depends(get_db))
+@router.get("/getUser/")
+def get_user(user_id: int, db=Depends(get_db)):
+    print(user_id)
+    return user_store.get_user_by_id(db, user_id)

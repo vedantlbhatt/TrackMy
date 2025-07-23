@@ -14,14 +14,15 @@ def get_db():
     finally:
         db.close()
 
-@router.get("getItemByUser/userId/{user_id}/itemId/{item_id}")
-def get_item_by_user(user_id: int, item_id: int):
-    return item_store.get_item_by_user(user_id, item_id)
+@router.get("/getItemByUser/")
+def get_item_by_user(user_id: int, item_id: int, db=Depends(get_db)):
+    # Need error handling for if user doesnt have items
+    return item_store.get_item_by_user(db, user_id, item_id)
 
-@router.get("getItemsByUser/userId/{user_id}")
-def get_items_by_user(user_id: int):
-    return item_store.get_items_by_user(user_id)
+@router.get("/getItemsByUser/")
+def get_items_by_user(user_id: int, db=Depends(get_db)):
+    return item_store.get_items_by_user(db, user_id)
     
-@router.post("addItemByUser/userId/{user_id}/itemId/{item_id}")
-def get_items_by_user(user_id: int):
-    return item_store.get_items_by_user(user_id)
+@router.post("/addItemByUser/")
+def add_item_by_user(user_id: int, name: str,  db=Depends(get_db)):
+    return item_store.create_item(db, user_id, name)
