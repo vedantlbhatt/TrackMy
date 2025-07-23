@@ -11,6 +11,9 @@ class user_store:
     def get_user_by_id(db, user_id):
         return db.query(User).filter(User.user_id == user_id).first()
     
+    def delete_user(db, user_id):
+        return None # Temporary
+    
 class item_store:
     '''
     This may need a system where when an item is created, image and embedding as result is required. 
@@ -27,8 +30,10 @@ class item_store:
         return item
 
     def get_item_by_user(db, user_id, item_id):
-        return db.query(Item).filter(Item.id == item_id, Item.user_id == user_id).first()
+        return db.query(Item).filter(Item.item_id == item_id, Item.user_id == user_id).first()
     
     def get_items_by_user(db, user_id):
         return db.query(Item).filter(Item.user_id == user_id).all()
-
+    
+    def delete_item(db, item_id):
+        return None # Temporary
