@@ -1,9 +1,8 @@
 torch
-faiss
+faiss-cpu
 numpy
 transformers
-Image
-io
+pillow           
 fastapi
 uvicorn[standard]
 sqlalchemy
