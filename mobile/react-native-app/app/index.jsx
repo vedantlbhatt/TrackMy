@@ -20,7 +20,6 @@ export default function SheetExample() {
         <TouchableOpacity
           style={styles.overlay}
           activeOpacity={1}
-          onPressOut={() => setModalVisible(false)}
         >
           <CreateReportView onClose={() => setModalVisible(false)} />
         </TouchableOpacity>
