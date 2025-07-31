@@ -18,7 +18,7 @@ def get_db():
 
 def add_user(user: UserCreate, db=Depends(get_db)):
     print("Received user:", user)
-    print("googoo")
+    print("googoo") # why cant i delete this
     return user_store.create_user(db, user.email, user.user_name, user.payment_source)
 
 @router.get("/getUser/")
