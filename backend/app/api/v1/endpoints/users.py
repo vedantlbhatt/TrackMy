@@ -3,6 +3,7 @@ from app.services.db import item_store
 from app.services.db import user_store
 from app.core.init_db import SessionLocal
 from app.models.user import User
+from app.schemas.user import UserCreate
 
 router = APIRouter()
 
@@ -14,8 +15,11 @@ def get_db():
         db.close()
 
 @router.post("/addUser/")
-def add_user(email: str, user_name: str, payment_source: str, db=Depends(get_db)):
-    return user_store.create_user(db, email, user_name, payment_source)
+
+def add_user(user: UserCreate, db=Depends(get_db)):
+    print("Received user:", user)
+    print("googoo")
+    return user_store.create_user(db, user.email, user.user_name, user.payment_source)
 
 @router.get("/getUser/")
 def get_user(user_id: int, db=Depends(get_db)):
