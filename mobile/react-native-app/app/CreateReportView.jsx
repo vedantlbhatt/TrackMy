@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Dimensions, Button, TextInput } from 'react-nat
 import React, {useState} from 'react'
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
+import { handleUser } from '../api/user_api';
 
 const { height } = Dimensions.get('window');
 
@@ -23,7 +24,12 @@ const CreateReportView = ({onClose}) => {
   return (
     <View style={styles.sheet}>
         <Text style={[styles.sheetTitle]}>Submit Report</Text>
+        <Text>${lostItemName}</Text>
         <Button title="Close" onPress={onClose} />
+        <Button
+                title="Submit This Johnson!"
+                onPress={() => handleUser('/addItemByUser/', { name: lostItemName}, 'POST')}
+        />
 
       <TextInput
       style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
