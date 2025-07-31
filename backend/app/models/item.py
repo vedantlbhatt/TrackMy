@@ -9,4 +9,4 @@ class Item(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"))
     
     user = relationship("User", back_populates="items")
-    image = relationship("Image", back_populates="item", uselist=False)
+    image = relationship("Image", back_populates="item", uselist=True)
