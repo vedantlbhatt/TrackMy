@@ -9,6 +9,7 @@ export default function SheetExample() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPaymentSource, setUserPaymentSource] = useState('');
+  const [placeholderPassword, setPlaceholderPassword] = useState('');
 
 
 
@@ -64,10 +65,16 @@ export default function SheetExample() {
             value={userPaymentSource} 
             placeholder="payment source" 
             />
+      <TextInput
+            style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
+            onChangeText={newText => setPlaceholderPassword(newText)} 
+            value={placeholderPassword} 
+            placeholder="placeholder password" 
+            />
 
       <Button
         title="Add User" 
-        onPress={() => handleUser('/addUser/', { user_name: userName, email: userEmail, payment_source: userPaymentSource }, 'POST')} // function that calls handleUser when pressed
+        onPress={() => handleUser('/addUser/', { user_name: userName, email: userEmail, payment_source: userPaymentSource, hashed_password: placeholderPassword }, 'POST')} // function that calls handleUser when pressed
       />
 
 
