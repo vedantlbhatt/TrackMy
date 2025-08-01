@@ -8,6 +8,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from app.models.user import User
 from app.models.item import Item
 from app.models.image import Image
+from app.models.foundReport import FoundReport
+from app.models.lostReport import LostReport
 
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

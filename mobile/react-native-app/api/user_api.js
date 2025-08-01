@@ -1,23 +1,34 @@
-const API_URL = "http://127.0.0.1:8000/api";
+import axios from 'axios';
 
-export const handleUser = async (endpoint, userData, method) => {
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        Alert.alert('Success');
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Error'); 
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Network error or server not reachable');
+const API_URL = 'http://127.0.0.1:8000/api';
+
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const apiRequest = async (endpoint, data = {}, method) => {
+  try {
+    const config = {
+      url: endpoint,
+      method,
+    };
+
+    if (method.toUpperCase() === 'GET') {
+      config.params = data;
+    } else {
+      config.data = data; 
     }
-  };
+
+    const response = await axiosInstance.request(config);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { detail: 'Network error or server not reachable' };
+  }
+};
+
+export const handleUser = (endpoint, userData, method) => {
+  return apiRequest(endpoint, userData, method);
+};
