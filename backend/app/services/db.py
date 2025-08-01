@@ -1,8 +1,8 @@
 from app.models.user import User
 from app.models.item import Item
 class user_store:
-    def create_user(db, email, user_name, payment_source):
-        user = User(email=email, user_name=user_name, payment_source=payment_source)
+    def create_user(db, email, user_name, payment_source, hashed_password):
+        user = User(email=email, user_name=user_name, payment_source=payment_source, hashed_password=hashed_password)
         db.add(user)
         db.commit()
         db.refresh(user)

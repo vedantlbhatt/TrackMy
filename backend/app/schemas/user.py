@@ -4,3 +4,4 @@ class UserCreate(BaseModel):
     email: str
     user_name: str
     payment_source: str
+    hashed_password: str
