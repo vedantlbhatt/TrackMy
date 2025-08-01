@@ -9,7 +9,9 @@ class Item(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"))
     
     user = relationship("User", back_populates="items")
-    image = relationship("Image", back_populates="item", uselist=False)
     
     # Currently flow goes Item->Image->Embedding
     # As such, Embedding would theoretically have the most information, but it should only backpopulate to Image
+    image = relationship("Image", back_populates="item", uselist=True)
+    lost_reports = relationship("LostReport", back_populates= "item")
+    found_reports = relationship("FoundReport", back_populates = "item")    

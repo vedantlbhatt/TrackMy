@@ -9,3 +9,4 @@ android/.idea/
 .env
 bvenv/
 **/__pycache__/
+*.pyc
