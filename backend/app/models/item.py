@@ -10,3 +10,5 @@ class Item(Base):
     
     user = relationship("User", back_populates="items")
     image = relationship("Image", back_populates="item", uselist=True)
+    lost_report = relationship("LostReport", back_populates= "item")
+    found_reports = relationship("FoundReport", back_populates = "item")    
