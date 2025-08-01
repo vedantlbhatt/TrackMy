@@ -1,13 +1,24 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
-class User(Base):
-    __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    user_name = Column(String(255), nullable=False)
-    payment_source = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable = False)
+#create a view that joins item, lostReport, image (maybe image embedding) for easier access later amundo!
+#*
+#current structure is like 
+#                                          /--reference to user who lost item
+#              /-- reference to lost item --
+# lostReport --                           \-- reference to image/images associated with lost item
+#              \--
+
+class LostReport(Base):
+    __tablename__ = "lost_reports"
+    lost_report_id = Column(Integer, primary_key = True, index = True, nullable = False)
+    lost_item_id = Column(Integer, ForeignKey("items.item_id"), index = True, nullable = False)
+    lost_report_description = Column(VARCHAR(1000), nullable = True)
+    longitude = Column(DECIMAL(8,6), nullable = True)
+    latitude = Column(DECIMAL(9,6), nullable = True)
+    radius = Column(Integer, nullable = True)
+    bounty = Column(DECIMAL(6,2), nullable = True)
     
-    items = relationship("Item", back_populates="user")
+    
+    item = relationship("Item", back_populates="lost_reports")
