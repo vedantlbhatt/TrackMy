@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 const API_URL = 'http://127.0.0.1:8000/api';
 
 const axiosInstance = axios.create({
@@ -8,18 +9,17 @@ const axiosInstance = axios.create({
   },
 });
 
-export const apiRequest = async (endpoint, data = {}, method = 'GET') => {
+export const apiRequest = async (endpoint, data = {}, method) => {
   try {
     const config = {
       url: endpoint,
       method,
     };
 
-    // For GET, use params; for others, use data
     if (method.toUpperCase() === 'GET') {
       config.params = data;
     } else {
-      config.data = data;
+      config.data = data; 
     }
 
     const response = await axiosInstance.request(config);
