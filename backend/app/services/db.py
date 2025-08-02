@@ -23,7 +23,8 @@ class item_store:
         return item
 
     def get_item_by_user(db, user_id, item_id):
-        return db.query(Item).filter(Item.item_id == item_id, Item.user_id == user_id).first()
+        return db.query(Item).filter(Item.item_id == item_id, Item.user_id == user_id)
+        #structure of query
     
     def get_items_by_user(db, user_id):
         return db.query(Item).filter(Item.user_id == user_id).all()

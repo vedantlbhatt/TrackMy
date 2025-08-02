@@ -10,39 +10,7 @@ export default function SheetExample() {
   const [userEmail, setUserEmail] = useState('');
   const [userPaymentSource, setUserPaymentSource] = useState('');
   const [placeholderPassword, setPlaceholderPassword] = useState('');
-
-
-
-
-  const handleAddUser = async () => {
-    try {
-      const response = await fetch(`${API_URL}/addUser/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_name: userName,
-          email: userEmail,
-          payment_source: userPaymentSource,
-        }),
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        Alert.alert('Success', `User added with ID: ${data.user_id}`);
-        setUserName('');
-        setUserEmail('');
-        setUserPaymentSource('');
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Error', errorData.detail || 'Failed to add user'); 
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Network error or server not reachable');
-    }
-  };
-  
+  const [returned_user, setRRu] = useState();
 
   return (
     <View style={styles.container}>
@@ -71,6 +39,27 @@ export default function SheetExample() {
             value={placeholderPassword} 
             placeholder="placeholder password" 
             />
+
+      <Button
+        title = "Get User Information"
+        onPress = {async () => // this is async because we use await in the next line
+          {const returned_val = handleUser('/getUser/', {user_id: 2}, 'GET'); 
+          /* const returned_val is the return value of the function handleUser
+          // we use 'await' bc handleUser will return a Promise (case where async functions 
+          // are still loading so a promise is like a "promise" to return something)
+          // so await is used to WAIT for the promise to be resolved -> allowing us to get the value we want
+          // note: currently we only fetch user_id: 2 or whatver we specify, will work properly after we 
+          // implement login
+          */ 
+          setRRu(returned_val);
+          console.log(returned_user.email)
+        }}
+      />
+
+      { returned_user &&
+      <Text>{returned_user.email}</Text>
+      }
+      
 
       <Button
         title="Add User" 

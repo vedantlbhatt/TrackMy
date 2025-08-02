@@ -15,7 +15,6 @@ def get_db():
         db.close()
 
 @router.post("/addUser/")
-
 def add_user(user: UserCreate, db=Depends(get_db)):
     print("Received user:", user)
     print("googoo") # why cant i delete this
