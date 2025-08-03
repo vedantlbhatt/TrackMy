@@ -1,10 +1,14 @@
 from app.models.user import User
 from app.models.item import Item
+import bcrypt
+
 class user_store:
     def signup(db, email, user_name, password): #functionally identical to create_user -> temporary
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user is None:
-            user = User(email=email, user_name=user_name, password=password)
+            random_salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password, random_salt)
+            user = User(email=email, user_name=user_name, password=hashed_password)
             db.add(user)
             db.commit()
             db.refresh(user)
