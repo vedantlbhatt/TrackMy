@@ -59,11 +59,10 @@ export default function SheetExample() {
       { returned_user &&
       <Text>{returned_user.email}</Text>
       }
-      
-
+    
       <Button
-        title="Add User" 
-        onPress={() => handleUser('/addUser/', { user_name: userName, email: userEmail, payment_source: userPaymentSource, hashed_password: placeholderPassword }, 'POST')} // function that calls handleUser when pressed
+        title="Sign up User" 
+        onPress={() => handleUser('/signup/', { user_name: userName, email: userEmail, password: placeholderPassword }, 'POST')} // function that calls handleUser when pressed
       />
 
 
