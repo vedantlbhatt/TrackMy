@@ -20,7 +20,7 @@ class user_store:
         if existing_user is None: # if above query returns None, no existing user exists with that email
             random_salt = bcrypt.gensalt() # generates random salt
             hashed_password = bcrypt.hashpw(hashed_password.encode('utf-8'), random_salt) #hashes password into hashed_password (one-way)
-            user = User(email=email, user_name=user_name, password=hashed_password)
+            user = User(email=email, user_name=user_name, hashed_password=hashed_password)
             db.add(user)
             db.commit()
             db.refresh(user)
