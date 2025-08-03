@@ -1,8 +1,21 @@
 from app.models.user import User
 from app.models.item import Item
+from fastapi import HTTPException, status
 import bcrypt
 
 class user_store:
+
+    def login_user(db, email, password):
+        user = db.query(User).filter(User.email == email).first()
+        if (not user):
+            print("not user")
+        if (not (bcrypt.checkpw(password.encode('utf-8'), user.hashed_password.encode('utf-8')) == True)):
+            print("bad password")
+        else:
+            print("all good!")
+            return user
+        
+
     def signup(db, email, user_name, password): #functionally identical to create_user -> temporary
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user is None:
@@ -26,6 +39,8 @@ class user_store:
             db.refresh(user)
             return user
         return None
+    
+
 
     def get_user_by_id(db, user_id):
         return db.query(User).filter(User.user_id == user_id).first()

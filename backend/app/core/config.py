@@ -10,6 +10,11 @@ class Settings:
     MYSQL_HOST: str = os.getenv("MYSQL_HOST", "db")
     MYSQL_PORT: int = int(os.getenv("MYSQL_PORT", 3306))
 
+    SECRET_KEY = "your-secret-key"  # This should be random and secure in real apps
+    ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
     SQLALCHEMY_DATABASE_URI = (
         f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
     )
