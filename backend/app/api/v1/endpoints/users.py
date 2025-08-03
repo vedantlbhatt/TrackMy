@@ -4,6 +4,7 @@ from app.services.db import user_store
 from app.core.init_db import SessionLocal
 from app.models.user import User
 from app.schemas.user import UserCreate
+from app.schemas.signup import SignupRequest
 
 router = APIRouter()
 
@@ -13,6 +14,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@router.post("/signup/")
+def signup(payload: SignupRequest, db=Depends(get_db)):
+    return user_store.create_user(db, payload.email, payload.user_name, payload.password)
 
 @router.post("/addUser/")
 def add_user(user: UserCreate, db=Depends(get_db)):

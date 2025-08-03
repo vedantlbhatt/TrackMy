@@ -1,12 +1,25 @@
 from app.models.user import User
 from app.models.item import Item
 class user_store:
+    def signup(db, email, user_name, password): #functionally identical to create_user -> temporary
+        existing_user = db.query(User).filter(User.email == email).first()
+        if existing_user is None:
+            user = User(email=email, user_name=user_name, password=password)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            return user
+        return None
+
     def create_user(db, email, user_name, payment_source, hashed_password):
-        user = User(email=email, user_name=user_name, payment_source=payment_source, hashed_password=hashed_password)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
+        existing_user = db.query(User).filter(User.email == email).first()
+        if existing_user is None:
+            user = User(email=email, user_name=user_name, payment_source=payment_source, hashed_password=hashed_password)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            return user
+        return None
 
     def get_user_by_id(db, user_id):
         return db.query(User).filter(User.user_id == user_id).first()
