@@ -15,10 +15,12 @@ class user_store:
             return user
         return None
 
-    def create_user(db, email, user_name, payment_source, hashed_password):
-        existing_user = db.query(User).filter(User.email == email).first()
-        if existing_user is None:
-            user = User(email=email, user_name=user_name, payment_source=payment_source, hashed_password=hashed_password)
+    def create_user(db, email, user_name, hashed_password):
+        existing_user = db.query(User).filter(User.email == email).first() #checks if existing user with same email exists
+        if existing_user is None: # if above query returns None, no existing user exists with that email
+            random_salt = bcrypt.gensalt() # generates random salt
+            hashed_password = bcrypt.hashpw(hashed_password.encode('utf-8'), random_salt) #hashes password into hashed_password (one-way)
+            user = User(email=email, user_name=user_name, hashed_password=hashed_password)
             db.add(user)
             db.commit()
             db.refresh(user)
