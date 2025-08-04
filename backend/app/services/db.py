@@ -9,8 +9,10 @@ class user_store:
         user = db.query(User).filter(User.email == email).first()
         if (not user):
             print("not user")
+            return None
         if (not (bcrypt.checkpw(password.encode('utf-8'), user.hashed_password.encode('utf-8')) == True)):
             print("bad password")
+            return None
         else:
             print("all good!")
             return user

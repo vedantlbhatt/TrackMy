@@ -23,13 +23,21 @@ export default function Auth() {
                 placeholder="Password"
                 secureTextEntry={true}
             />
-             <TouchableOpacity style={styles.buttonContainer} onPress={() => {handleUser('/login/', {email: email, password: password}, 'POST')}}>
+             <TouchableOpacity style={styles.buttonContainer} onPress={() => {console.log('Login button pressed');
+                handleUser('/login/', {email: email, password: password}, 'POST')}}>
                 <Text style={styles.buttonText}>Login???</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.buttonContainer} onPress={() => { /* signup action */ }}>
                 <Text style={styles.buttonText}>Sign up!!!</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.buttonContainer} onPress={async () => {const userData = await handleUser('/dashboard', {}, 'GET');
+                console.log(userData.user_id);}}>
+                <Text style={styles.buttonText}>Test Login!</Text>
+            </TouchableOpacity>
+            
+
 
 
 

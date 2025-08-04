@@ -43,7 +43,7 @@ export default function Home() {
         <Button
           title = "Get User Information"
           onPress = {async () => // this is async because we use await in the next line
-            {const returned_val = handleUser('/getUser/', {user_id: 2}, 'GET'); 
+            {const returned_val = await handleUser('/getUser/', {user_id: 2}, 'GET'); //check if we need await here 12:12am  aug 4
             /* const returned_val is the return value of the function handleUser
             // we use 'await' bc handleUser will return a Promise (case where async functions 
             // are still loading so a promise is like a "promise" to return something)
