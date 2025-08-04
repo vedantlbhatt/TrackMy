@@ -5,6 +5,7 @@ from app.core.init_db import SessionLocal
 from app.models.user import User
 from app.schemas.user import UserCreate
 from app.schemas.signup import SignupRequest
+from app.schemas.login import LoginRequest
 
 router = APIRouter()
 
@@ -16,14 +17,15 @@ def get_db():
         db.close()
 
 @router.post("/signup/")
-def signup(payload: SignupRequest, db=Depends(get_db)):
-    return user_store.create_user(db, payload.email, payload.user_name, payload.password)
-
-@router.post("/addUser/")
-def add_user(user: UserCreate, db=Depends(get_db)):
+def add_user(user: SignupRequest, db=Depends(get_db)):
     print("Received user:", user)
     print("googoo") # why cant i delete this
-    return user_store.create_user(db, user.email, user.user_name, user.payment_source, user.hashed_password)
+    return user_store.create_user(db, user.email, user.user_name, user.password)
+
+@router.post("/login/")
+def login(request: LoginRequest, db=Depends(get_db)):
+    print("poops")
+    return user_store.login_user(db, request.email, request.password)
 
 @router.get("/getUser/")
 def get_user(user_id: int, db=Depends(get_db)):
