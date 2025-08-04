@@ -12,11 +12,14 @@ def get_db():
         db.close()
 
 @router.post("/addImageToIndex/")
-def add_image(image_url: str):
-    return vision_store.add_image_to_index(image_url)
+def add_image(item_id: int, image_url: str, db=Depends(get_db)):
+    return vision_store.create_image(db, item_id, image_url)
 
 @router.get("/getImageComparison/")
-def get_image_comparison(image_url: str):
-    return vision_store.get_similar_images(image_url)
+def get_image_comparison(item_id: int, image_url: str, db=Depends(get_db)):
+    return vision_store.get_if_same_item(db, item_id, image_url)
 
+@router.delete("/deleteFaissIndex/")
+def clear_faiss_index():
+    return vision_store.clear_faiss_index()
 

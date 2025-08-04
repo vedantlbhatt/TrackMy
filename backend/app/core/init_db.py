@@ -8,7 +8,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from app.models.user import User
 from app.models.item import Item
 from app.models.image import Image
-from app.models.embed import Embed
 from app.models.foundReport import FoundReport
 from app.models.lostReport import LostReport
 
