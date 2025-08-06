@@ -11,11 +11,12 @@ export default function Auth() {
     const [password, setUserPassword] = useState('');
     const [userData, setUserData] = useState('')
     const navigation = useNavigation();
+    const [showSignUpInputs, setShowInputs] = useState(false);
 
     const handlepoops = async () => {
-        await handleLogin({email, password})
-        if (email && password) {
-        console.log("enpebhurebhu")
+        request = await handleLogin({email, password})
+        console.log("hello!!!")
+        if (request) {
           navigation.replace('Home'); // Navigate on success
         } else {
           alert('Please enter email and password');
@@ -37,13 +38,29 @@ export default function Auth() {
                 placeholder="Password"
                 secureTextEntry={true}
             />
-             <TouchableOpacity style={styles.buttonContainer} onPress={() => {console.log('Login button pressed');
+
+            {
+                showSignUpInputs && (
+                    <View>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={newText => setEmail(newText)}
+                            value={email}
+                            placeholder="Username"
+                        />
+
+                        {/* add future text inputs to account for other attributes of users*/}
+                        
+                    </View>
+                )
+            }
+             <TouchableOpacity style={styles.buttonContainer} onPress={() => {
                 handlepoops()}}>
 
                 <Text style={styles.buttonText}>Login???</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonContainer} onPress={() => { /* signup action */ }}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={() => {setShowInputs(true)}}>
                 <Text style={styles.buttonText}>Sign up!!!</Text>
             </TouchableOpacity>
 

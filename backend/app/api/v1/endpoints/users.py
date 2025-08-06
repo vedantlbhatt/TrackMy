@@ -27,12 +27,12 @@ def add_user(user: SignupRequest, db=Depends(get_db)):
 
 @router.post("/login/")
 def login(request: LoginRequest, db=Depends(get_db)):
-    print("loginamundo!")
     user = user_store.login_user(db, request.email, request.password)
     if (user):
         token = auth.create_access_token(data = {"user_id": user.user_id})
         return {"access_token": token}
-    return {"error": "Invalid login"}
+    print("aware that user is wrong")
+    return None
 
 @router.get("/profile/")
 def read_profile(db = Depends(get_db), current_user_id = Depends(get_current_user)):
