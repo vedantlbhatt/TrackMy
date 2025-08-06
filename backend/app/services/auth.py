@@ -29,6 +29,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("user_id")
         if user_id is None:
+            print("user id is nONE!!")
             raise HTTPException(status_code=401, detail="Invalid token payload")
         return user_id
     except JWTError:

@@ -1,4 +1,7 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -8,6 +11,34 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export const handleLogin = async(data = {}) => {
+  try {
+        const config = {
+          url: API_URL + '/login/',
+          method: 'POST',
+        };
+
+        config.data = data;
+
+        await AsyncStorage.removeItem('access_token');
+        const response = await axiosInstance.request(config);
+        
+        console.log("Response received:", response.data);
+
+        if (response.data.access_token) {
+          console.log("token")
+          await AsyncStorage.setItem('access_token', response.data.access_token);
+          console.log('Saved token:', await AsyncStorage.getItem('access_token'));
+        }
+        console.log("token:", response.data.access_token)
+
+        return response.data;
+
+  } catch (error) {
+    throw error.response?.data || { detail: 'Network error or server not reachable' };
+  }
+}
 
 export const apiRequest = async (endpoint, data = {}, method) => {
   try {
@@ -23,18 +54,21 @@ export const apiRequest = async (endpoint, data = {}, method) => {
     }
 
     const token = await AsyncStorage.getItem('access_token');
+
     if (token) {
       config.headers = {
         Authorization: `Bearer ${token}`
       };
     }
 
+    console.log("Request config:", config); 
+
     const response = await axiosInstance.request(config);
 
-    if (endpoint === '/login' && response.data.access_token) {
-      await AsyncStorage.setItem('access_token', response.data.access_token);
-    }
-    
+    //if (endpoint === '/login/' && response.data.access_token) {
+    //  await AsyncStorage.setItem('access_token', response.data.access_token);
+    //}
+
     return response.data;
   } catch (error) {
     throw error.response?.data || { detail: 'Network error or server not reachable' };
@@ -42,6 +76,5 @@ export const apiRequest = async (endpoint, data = {}, method) => {
 };
 
 export const handleUser = (endpoint, userData, method) => {
-  console.log("handle")
   return apiRequest(endpoint, userData, method);
 };

@@ -2,11 +2,25 @@ import { StyleSheet, Text, View, Dimensions, Button, TextInput, TouchableOpacity
 import React, { useState } from 'react'
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
-import { handleUser } from '../api/user_api';
+import { handleUser, handleLogin } from '../api/user_api';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setUserPassword] = useState('');
+    const [userData, setUserData] = useState('')
+    const navigation = useNavigation();
+
+    const handlepoops = async () => {
+        await handleLogin({email, password})
+        if (email && password) {
+        console.log("enpebhurebhu")
+          navigation.replace('Home'); // Navigate on success
+        } else {
+          alert('Please enter email and password');
+        }
+      };
 
     return (
         <View style={styles.container}>
@@ -24,7 +38,8 @@ export default function Auth() {
                 secureTextEntry={true}
             />
              <TouchableOpacity style={styles.buttonContainer} onPress={() => {console.log('Login button pressed');
-                handleUser('/login/', {email: email, password: password}, 'POST')}}>
+                handlepoops()}}>
+
                 <Text style={styles.buttonText}>Login???</Text>
             </TouchableOpacity>
 
@@ -32,15 +47,14 @@ export default function Auth() {
                 <Text style={styles.buttonText}>Sign up!!!</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonContainer} onPress={async () => {const userData = await handleUser('/dashboard', {}, 'GET');
+            <TouchableOpacity style={styles.buttonContainer} onPress={async () => {const userData = await handleUser('/profile/', {}, 'GET'); setUserData(userData)
                 console.log(userData.user_id);}}>
                 <Text style={styles.buttonText}>Test Login!</Text>
             </TouchableOpacity>
-            
 
-
-
-
+            { userData &&
+            <Text>{"user_id:" + userData.user_id}</Text>
+            }
         </View>
     );
 }

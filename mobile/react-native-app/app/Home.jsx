@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, StyleSheet, TouchableOpacity, Dimensions, TextInput } from 'react-native';
 import CreateReportView from './CreateReportView';
 import { handleUser } from '../api/user_api';
@@ -11,10 +11,25 @@ export default function Home() {
     const [userPaymentSource, setUserPaymentSource] = useState('');
     const [placeholderPassword, setPlaceholderPassword] = useState('');
     const [returned_user, setRRu] = useState();
+    const [user, setUser] = useState();
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchUser = async () => {
+      const user = await handleUser('/profile/', {}, 'GET');
+      setUser(user)
+
+      console.log('User from API:', user);
+
+      }
+      fetchUser()
+    }, []);
   
+
     return (
       <View style={styles.container}>
-        <Text>${userName}</Text>
+
+        <Text>{"Welcome, " + user?.user_name}</Text>
         <TextInput
               style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
               onChangeText={newText => setUserName(newText)} 
