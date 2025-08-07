@@ -10,4 +10,5 @@ pymysql
 python-dotenv
 pydantic
 cryptography
+alembic
 bcrypt
