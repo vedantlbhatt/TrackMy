@@ -23,12 +23,9 @@ export const handleLogin = async(data = {}) => {
 
         await AsyncStorage.removeItem('access_token');
         const response = await axiosInstance.request(config);
-        console.log("reply1")
         if (!(response)) {
-          console.log("reply")
           return None
         }
-        console.log("reply")
         if (response.data.access_token) {
           await AsyncStorage.setItem('access_token', response.data.access_token);
         } else {

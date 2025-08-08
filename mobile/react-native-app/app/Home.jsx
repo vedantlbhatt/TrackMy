@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, StyleSheet, TouchableOpacity, Dimensions, TextInput } from 'react-native';
 import CreateReportView from './CreateReportView';
 import { handleUser } from '../api/user_api';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function Home() {
@@ -12,7 +13,7 @@ export default function Home() {
     const [placeholderPassword, setPlaceholderPassword] = useState('');
     const [returned_user, setRRu] = useState();
     const [user, setUser] = useState();
-    const [isLoading, setIsLoading] = useState(true);
+    const navigation = useNavigation();
 
     useEffect(() => {
       const fetchUser = async () => {
@@ -69,6 +70,11 @@ export default function Home() {
             setRRu(returned_val);
             console.log(returned_user.email)
           }}
+        />
+
+        <Button
+          title = "Sign out"
+          onPress = {() => {navigation.replace('AuthView')}}
         />
   
         { returned_user &&

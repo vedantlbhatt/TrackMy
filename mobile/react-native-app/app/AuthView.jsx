@@ -15,7 +15,6 @@ export default function Auth() {
 
     const handlepoops = async () => {
         request = await handleLogin({email, password})
-        console.log("hello!!!")
         if (request) {
           navigation.replace('Home'); // Navigate on success
         } else {
@@ -60,7 +59,7 @@ export default function Auth() {
                 <Text style={styles.buttonText}>Login???</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonContainer} onPress={() => {setShowInputs(true)}}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={() => {navigation.navigate('SignUp')}}>
                 <Text style={styles.buttonText}>Sign up!!!</Text>
             </TouchableOpacity>
 
