@@ -55,7 +55,7 @@ class item_store:
     (For devs, may also need a system to update embeds independently)
     This will most likely be handled in utils.
     '''
-    def create_item(db, name, user_id): 
+    def create_item(db, user_id, name): 
         item = Item(name=name, user_id=user_id) 
         db.add(item)
         db.commit()
