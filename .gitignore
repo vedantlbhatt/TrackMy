@@ -10,3 +10,4 @@ android/.idea/
 bvenv/
 **/__pycache__/
 *.pyc
+backend/faiss.index
