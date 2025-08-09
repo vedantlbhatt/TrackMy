@@ -2,11 +2,25 @@ import { StyleSheet, Text, View, Dimensions, Button, TextInput, TouchableOpacity
 import React, { useState } from 'react'
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
-import { handleUser } from '../api/user_api';
+import { handleUser, handleLogin } from '../api/user_api';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setUserPassword] = useState('');
+    const [userData, setUserData] = useState('')
+    const navigation = useNavigation();
+    const [showSignUpInputs, setShowInputs] = useState(false);
+
+    const handlepoops = async () => {
+        request = await handleLogin({email, password})
+        if (request) {
+          navigation.replace('Home'); // Navigate on success
+        } else {
+          alert('Please enter email and password');
+        }
+      };
 
     return (
         <View style={styles.container}>
@@ -23,16 +37,40 @@ export default function Auth() {
                 placeholder="Password"
                 secureTextEntry={true}
             />
-             <TouchableOpacity style={styles.buttonContainer} onPress={() => {handleUser('/login/', {email: email, password: password}, 'POST')}}>
+
+            {
+                showSignUpInputs && (
+                    <View>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={newText => setEmail(newText)}
+                            value={email}
+                            placeholder="Username"
+                        />
+
+                        {/* add future text inputs to account for other attributes of users*/}
+                        
+                    </View>
+                )
+            }
+             <TouchableOpacity style={styles.buttonContainer} onPress={() => {
+                handlepoops()}}>
+
                 <Text style={styles.buttonText}>Login???</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonContainer} onPress={() => { /* signup action */ }}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={() => {navigation.navigate('SignUp')}}>
                 <Text style={styles.buttonText}>Sign up!!!</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity style={styles.buttonContainer} onPress={async () => {const userData = await handleUser('/profile/', {}, 'GET'); setUserData(userData)
+                console.log(userData.user_id);}}>
+                <Text style={styles.buttonText}>Test Login!</Text>
+            </TouchableOpacity>
 
-
+            { userData &&
+            <Text>{"user_id:" + userData.user_id}</Text>
+            }
         </View>
     );
 }

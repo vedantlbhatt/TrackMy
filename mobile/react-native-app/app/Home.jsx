@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, StyleSheet, TouchableOpacity, Dimensions, TextInput } from 'react-native';
 import CreateReportView from './CreateReportView';
 import { handleUser } from '../api/user_api';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function Home() {
@@ -11,10 +12,25 @@ export default function Home() {
     const [userPaymentSource, setUserPaymentSource] = useState('');
     const [placeholderPassword, setPlaceholderPassword] = useState('');
     const [returned_user, setRRu] = useState();
+    const [user, setUser] = useState();
+    const navigation = useNavigation();
+
+    useEffect(() => {
+      const fetchUser = async () => {
+      const user = await handleUser('/profile/', {}, 'GET');
+      setUser(user)
+
+      console.log('User from API:', user);
+
+      }
+      fetchUser()
+    }, []);
   
+
     return (
       <View style={styles.container}>
-        <Text>${userName}</Text>
+
+        <Text>{"Welcome, " + user?.user_name}</Text>
         <TextInput
               style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
               onChangeText={newText => setUserName(newText)} 
@@ -43,7 +59,7 @@ export default function Home() {
         <Button
           title = "Get User Information"
           onPress = {async () => // this is async because we use await in the next line
-            {const returned_val = handleUser('/getUser/', {user_id: 2}, 'GET'); 
+            {const returned_val = await handleUser('/getUser/', {user_id: 2}, 'GET'); //check if we need await here 12:12am  aug 4
             /* const returned_val is the return value of the function handleUser
             // we use 'await' bc handleUser will return a Promise (case where async functions 
             // are still loading so a promise is like a "promise" to return something)
@@ -54,6 +70,11 @@ export default function Home() {
             setRRu(returned_val);
             console.log(returned_user.email)
           }}
+        />
+
+        <Button
+          title = "Sign out"
+          onPress = {() => {navigation.replace('AuthView')}}
         />
   
         { returned_user &&

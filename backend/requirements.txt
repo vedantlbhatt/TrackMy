@@ -10,5 +10,6 @@ pymysql
 python-dotenv
 pydantic
 cryptography
-alembic
 bcrypt
+python-jose[cryptography]
+alembic
