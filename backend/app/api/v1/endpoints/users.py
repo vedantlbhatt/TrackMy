@@ -31,10 +31,9 @@ def login(request: LoginRequest, db=Depends(get_db)):
     if (user):
         token = auth.create_access_token(data = {"user_id": user.user_id})
         return {"access_token": token}
-    print("aware that user is wrong")
     return None
 
-@router.get("/profile/")
+@router.get("/profile/") # this is get the user by CURRENT USER (who is on the app)
 def read_profile(db = Depends(get_db), current_user_id = Depends(get_current_user)):
     current_user = user_store.get_user_by_id(db, current_user_id)
     return current_user
@@ -44,7 +43,7 @@ def read_profile(current_user_id: int = Depends(get_current_user)): #just figure
     current_user = user_store.get_user_by_id(db, current_user_id)
     return {current_user}
 
-@router.get("/getUser/")
+@router.get("/getUser/") # this is get user BY ID
 def get_user(user_id: int, db=Depends(get_db)):
     print(user_id)
     return user_store.get_user_by_id(db, user_id)

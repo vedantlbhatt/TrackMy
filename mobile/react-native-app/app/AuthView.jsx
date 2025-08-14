@@ -37,7 +37,7 @@ export default function Auth() {
                 placeholder="Password"
                 secureTextEntry={true}
             />
-
+            
             {
                 showSignUpInputs && (
                     <View>
