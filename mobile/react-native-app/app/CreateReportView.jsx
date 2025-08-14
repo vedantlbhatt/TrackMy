@@ -1,106 +1,289 @@
-import { StyleSheet, Text, View, Dimensions, Button, TextInput } from 'react-native'
-import React, {useState} from 'react'
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
+import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
 
 const { height } = Dimensions.get('window');
 
-const CreateReportView = ({onClose}) => {
+const CreateReportView = ({ onClose }) => {
+  const [user, setUser] = useState(null);
+  const [existingItem, setExistingItem] = useState(false);
+  const [marker, setMarker] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [latitude, setLatitude] = useState(null);
+  const [radius, setRadius] = useState(50);
+  const [name, setName] = useState('');
+  const [lostItemDescription, setLostItemDescription] = useState('');
+  const [itemBounty, setItemBounty] = useState('');
+  const [visibility, setVisibility] = useState('Public');
 
-    const [marker, setMarker] = useState(null);
-    const [radius, setRadius] = useState(50);
-    const [lostItemName, setLostItemName] = useState('');
-    const [lostItemDescription, setLostItemDescription] = useState('');
-    const [lostItemBounty, setLostItemBounty] = useState('');
+  // popup state
+  const [popupVisible, setPopupVisible] = useState(true);
+  const [showNewItemFields, setShowNewItemFields] = useState(false);
 
-    const region = {
-      latitude: 37.78825,
-      longitude: -122.4324,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+  // case of new item
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemDesc, setNewItemDesc] = useState('');
+
+ 
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await handleUser('/profile/', {}, 'GET');
+      setUser(user);
     };
-    
+    fetchUser();
+  }, []);
+
+  const region = {
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
+
   return (
-    <View style={styles.sheet}>
-        <Text style={[styles.sheetTitle]}>Submit Report</Text>
-        <Text>${lostItemName}</Text>
-        <Button title="Close" onPress={onClose} />
-        <Button
-                title="Submit This Johnson!"
-                onPress={() => handleUser('/addItemByUser/', { name: lostItemName}, 'POST')}
-        />
-
-      <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-      onChangeText={newText => setLostItemName(newText)} 
-      value={lostItemName} 
-      placeholder="What did you lose?" 
-      />
-
-      <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-      onChangeText={newText => setLostItemDescription(newText)} 
-      value={lostItemDescription} 
-      placeholder="Additional Information" 
-      />
-
-      <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-      onChangeText={newText => setLostItemBounty(newText)} 
-      value={lostItemBounty} 
-      placeholder="PLACEHOLDER for Bounty" 
-      />
-        
-        <View style={styles.sliderContainer}>
-        <Text style={styles.sliderLabel}>Radius: {radius.toFixed(0)}m</Text>
-
-        <Slider
-          style={{ width: '100%', height: 40}}
-          minimumValue={10}
-          maximumValue={500}
-          step={10}
-          value={radius}
-          onValueChange={setRadius}
-          minimumTrackTintColor="#FF0000"
-          maximumTrackTintColor="#999999"
-        />
-
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Create Report</Text>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>X</Text>
+        </TouchableOpacity>
       </View>
-        <MapView
-        style={styles.map}
-        initialRegion={region}
-        onPress={(e) => {
-          setMarker(e.nativeEvent.coordinate);
-        }}
+
+      {/* Centered Pop-up Alert */}
+      <Modal
+        visible={popupVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPopupVisible(false)}
       >
-        {marker && (
-          <>
-            <Marker coordinate={marker} />
-            <Circle
-              center={marker}
-              radius={radius}
-              strokeColor="rgba(255,0,0,0.5)"
-              fillColor="rgba(255,0,0,0.2)"
-            />
-          </>
-        )}
-      </MapView>
+        <View style={styles.overlay}>
+          <View style={styles.alertBox}>
+            {!showNewItemFields ? (
+              <>
+                <Text style={styles.alertTitle}>Choose from stored items?</Text>
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.alertButton, { backgroundColor: '#1E90FF' }]}
+                    onPress={() => { 
+                      setExistingItem(true); 
+                      setPopupVisible(false); 
+                    }}
+                  >
+                    <Text style={styles.alertButtonText}>Yes</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.alertButton, { backgroundColor: '#FF5722' }]}
+                    onPress={() => {
+                      setShowNewItemFields(true)
+                      setExistingItem(false);
+                    }}
+                  >
+                    <Text style={styles.alertButtonText}>No</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.alertTitle}>Add a New Item</Text> 
+                <TextInput
+                  style={styles.alertInput}
+                  placeholder="Item Name"
+                  placeholderTextColor="#888"
+                  value={newItemName}
+                  onChangeText={setNewItemName}
+                />
+                <TextInput
+                  style={[styles.alertInput, { height: 80, textAlignVertical: 'top' }]}
+                  placeholder="Description / Notes"
+                  placeholderTextColor="#888"
+                  multiline
+                  value={newItemDesc}
+                  onChangeText={setNewItemDesc}
+                />
+                <TouchableOpacity
+                  style={[styles.alertButton, { backgroundColor: '#1E90FF', marginTop: 10 }]}
+                  onPress={() => {
+                    setExistingItem(false);
+                    setPopupVisible(false);
+                    handleUser('/addItemByUser/', {user_id: user.user_id, name: newItemName}, 'POST');
+                  }}
+                >
+                  <Text style={styles.alertButtonText}>Continue</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Main Content */}
+      <ScrollView contentContainerStyle={styles.content}>
+        <MapView
+          style={styles.map}
+          initialRegion={region}
+          onPress={(e) => {
+            setMarker(e.nativeEvent.coordinate);
+            setLatitude(e.nativeEvent.coordinate.latitude);
+            setLongitude(e.nativeEvent.coordinate.longitude);
+          }}
+        >
+          {marker && (
+            <>
+              <Marker coordinate={marker} />
+              <Circle center={marker} radius={radius} />
+            </>
+          )}
+        </MapView>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Lost Item Name"
+          placeholderTextColor="#CCC"
+          value={name}
+          onChangeText={setName}
+        />
+
+        <TextInput
+          style={styles.descriptionInput}
+          placeholder="Lost Item Description"
+          placeholderTextColor="#CCC"
+          value={lostItemDescription}
+          onChangeText={setLostItemDescription}
+          multiline
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Bounty (Optional)"
+          placeholderTextColor="#CCC"
+          value={itemBounty}
+          onChangeText={setItemBounty}
+          keyboardType="numeric"
+        />
+
+        <View style={styles.sliderContainer}>
+          <Text style={styles.sliderLabel}>Radius: {radius} meters</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={10}
+            maximumValue={500}
+            step={10}
+            value={radius}
+            onValueChange={setRadius}
+            minimumTrackTintColor="#FFF"
+            maximumTrackTintColor="#888"
+          />
+        </View>
+
+        <View style={styles.dropdownContainer}>
+          <Text style={styles.dropdownLabel}>Who can view:</Text>
+          <Picker
+            selectedValue={visibility}
+            style={styles.dropdown}
+            onValueChange={(itemValue) => setVisibility(itemValue)}
+          >
+            <Picker.Item label="Public" value="Public" />
+            <Picker.Item label="Friends Only" value="Friends" />
+            <Picker.Item label="Only Me" value="Private" />
+          </Picker>
+        </View>
+
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={() => {
+            if (existingItem) {
+              handleUser('/createLostReport/', {
+                user_id: user.id,
+                item_id: 0, // placeholder for existing item ID
+                name,
+                longitude,
+                latitude,
+                radius,
+                description: lostItemDescription,
+                bounty: itemBounty
+              }, 'POST');
+            } else {
+              handleUser('/createLostReport/', {
+                user_id: user.id,
+                item_id: HEREHEREHERE, // how to get item_id of item just created?
+                name,
+                longitude,
+                latitude,
+                radius,
+                description: lostItemDescription,
+                bounty: itemBounty
+              }, 'POST');
+            }
+          }}
+        >
+          <Text style={styles.saveButtonText}>Submit Report</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
 
-export default CreateReportView
-
 const styles = StyleSheet.create({
-    map: {
-      flex: 1,
-    },
-    sheet: {
-        height: height * 0.9,
-        backgroundColor: 'white',
-        padding: 20,
-        borderTopRightRadius: 20,
-        borderTopLeftRadius: 20,
-      }
-})
+  container: { flex: 1, backgroundColor: '#2C2C2C' },
+  header: {
+    backgroundColor: '#DDD',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', flex: 1, textAlign: 'center' },
+  closeButton: { position: 'absolute', right: 16, top: 16 },
+  closeButtonText: { fontSize: 16, color: '#333' },
+  content: { padding: 16 },
+  map: { height: height * 0.3, borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
+  input: { backgroundColor: '#444', color: '#FFF', padding: 12, borderRadius: 8, marginBottom: 16 },
+  descriptionInput: {
+    backgroundColor: '#444',
+    color: '#FFF',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  sliderContainer: { marginBottom: 16 },
+  sliderLabel: { color: '#FFF', marginBottom: 8 },
+  slider: { width: '100%' },
+  dropdownContainer: { marginBottom: 16 },
+  dropdownLabel: { color: '#FFF', marginBottom: 8 },
+  dropdown: { backgroundColor: '#444', color: '#FFF', borderRadius: 8 },
+  saveButton: {
+    backgroundColor: '#1E90FF',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+
+  // Alert styles
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  alertBox: { width: '85%', backgroundColor: '#FFF', borderRadius: 12, padding: 20, elevation: 6 },
+  alertTitle: { fontSize: 18, fontWeight: '600', textAlign: 'center', color: '#333', marginBottom: 16 },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  alertButton: { flex: 1, paddingVertical: 10, borderRadius: 8, marginHorizontal: 5 },
+  alertButtonText: { color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 16 },
+  alertInput: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    color: '#000',
+  },
+});
+
+export default CreateReportView;

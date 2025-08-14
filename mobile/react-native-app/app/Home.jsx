@@ -1,121 +1,163 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Modal, StyleSheet, TouchableOpacity, Dimensions, TextInput } from 'react-native';
-import CreateReportView from './CreateReportView';
-import { handleUser } from '../api/user_api';
+import React, { useState, useRef } from 'react';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal } from 'react-native';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Modalize } from 'react-native-modalize';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import CreateReportView from './CreateReportView';
 
+const places = [
+  {
+    id: '1',
+    title: 'Coffee Shop',
+    description: 'Best coffee in town!',
+    coordinate: { latitude: 37.78825, longitude: -122.4324 },
+    image: 'https://placekitten.com/300/200'
+  },
+  {
+    id: '2',
+    title: 'Park',
+    description: 'Lovely green park for walks',
+    coordinate: { latitude: 37.78925, longitude: -122.4354 },
+    image: 'https://placekitten.com/301/201'
+  }
+];
 
 export default function Home() {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [userName, setUserName] = useState('');
-    const [userEmail, setUserEmail] = useState('');
-    const [userPaymentSource, setUserPaymentSource] = useState('');
-    const [placeholderPassword, setPlaceholderPassword] = useState('');
-    const [returned_user, setRRu] = useState();
-    const [user, setUser] = useState();
-    const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const modalRef = useRef(null);
+  const navigation = useNavigation();
 
-    useEffect(() => {
-      const fetchUser = async () => {
-      const user = await handleUser('/profile/', {}, 'GET');
-      setUser(user)
+  const onMarkerPress = (place) => {
+    setSelectedPlace(place);
+    modalRef.current?.open();
+  };
 
-      console.log('User from API:', user);
-
-      }
-      fetchUser()
-    }, []);
-  
-
-    return (
-      <View style={styles.container}>
-
-        <Text>{"Welcome, " + user?.user_name}</Text>
-        <TextInput
-              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-              onChangeText={newText => setUserName(newText)} 
-              value={userName} 
-              placeholder="username" 
-              />
-        <TextInput
-              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-              onChangeText={newText => setUserEmail(newText)} 
-              value={userEmail} 
-              placeholder="email" 
-              />
-        <TextInput
-              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-              onChangeText={newText => setUserPaymentSource(newText)} 
-              value={userPaymentSource} 
-              placeholder="payment source" 
-              />
-        <TextInput
-              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }} 
-              onChangeText={newText => setPlaceholderPassword(newText)} 
-              value={placeholderPassword} 
-              placeholder="placeholder password" 
-              />
-  
-        <Button
-          title = "Get User Information"
-          onPress = {async () => // this is async because we use await in the next line
-            {const returned_val = await handleUser('/getUser/', {user_id: 2}, 'GET'); //check if we need await here 12:12am  aug 4
-            /* const returned_val is the return value of the function handleUser
-            // we use 'await' bc handleUser will return a Promise (case where async functions 
-            // are still loading so a promise is like a "promise" to return something)
-            // so await is used to WAIT for the promise to be resolved -> allowing us to get the value we want
-            // note: currently we only fetch user_id: 2 or whatver we specify, will work properly after we 
-            // implement login
-            */ 
-            setRRu(returned_val);
-            console.log(returned_user.email)
-          }}
-        />
-
-        <Button
-          title = "Sign out"
-          onPress = {() => {navigation.replace('AuthView')}}
-        />
-  
-        { returned_user &&
-        <Text>{returned_user.email}</Text>
-        }
-      
-        <Button
-          title="Sign up User" 
-          onPress={() => handleUser('/signup/', { user_name: userName, email: userEmail, password: placeholderPassword }, 'POST')} // function that calls handleUser when pressed
-        />
-  
-  
-        <Button title="Open Sheet" onPress={() => setModalVisible(true)} />
-  
-        <Modal
-          animationType="slide"
-          ntransparent={true}
-          visible={modalVisible}  
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <TouchableOpacity
-            style={styles.overlay}
-            activeOpacity={1}
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* Map */}
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={{
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+      >
+        {places.map((place) => (
+          <Marker
+            key={place.id}
+            coordinate={place.coordinate}
+            title={place.title}
+            onPress={() => onMarkerPress(place)}
           >
-            <CreateReportView onClose={() => setModalVisible(false)} />
-          </TouchableOpacity>
-        </Modal>
-      </View>
-    );
-  }
-  
-  const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      justifyContent: 'flex-end',
-    },
-    sheetTitle: {
-      fontSize: 18,
-      marginBottom: 10,
-    },
-  });
-  
+            <Callout>
+              <Text>{place.title}</Text>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
+
+      {/* FAB Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
+      {/* Create Report Modal (moved outside the FAB) */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <CreateReportView onClose={() => setModalVisible(false)} />
+        </View>
+      </Modal>
+
+      {/* Place Details Bottom Sheet */}
+      <Modalize
+        ref={modalRef}
+        alwaysOpen={Dimensions.get('window').height * 0.25}
+        modalHeight={Dimensions.get('window').height * 0.9}
+        adjustToContentHeight={false}
+        withHandle
+      >
+        {selectedPlace ? (
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>{selectedPlace.title}</Text>
+            <Image
+              source={{ uri: selectedPlace.image }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <Text style={styles.description}>{selectedPlace.description}</Text>
+          </View>
+        ) : (
+          <Text style={styles.noSelection}>Select a place on the map</Text>
+        )}
+      </Modalize>
+    </GestureHandlerRootView>
+  );
+}
+
+const styles = StyleSheet.create({
+  map: {
+    flex: 1,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: '#333', // match CreateReportView theme
+  },
+  modalContent: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  image: {
+    width: Dimensions.get('window').width - 32,
+    height: 180,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  noSelection: {
+    padding: 20,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  fab: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: '#007AFF',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+  },
+  fabText: {
+    fontSize: 28,
+    color: '#fff',
+    marginBottom: 2,
+  },
+});

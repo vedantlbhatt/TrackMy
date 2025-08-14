@@ -69,7 +69,9 @@ export const apiRequest = async (endpoint, data = {}, method) => {
     //  await AsyncStorage.setItem('access_token', response.data.access_token);
     //}
 
+    console.log("response:", response.data)
     return response.data;
+
   } catch (error) {
     throw error.response?.data || { detail: 'Network error or server not reachable' };
   }
