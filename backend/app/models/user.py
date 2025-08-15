@@ -11,3 +11,5 @@ class User(Base):
     hashed_password = Column(String(255), nullable = False)
     
     items = relationship("Item", back_populates="user")
+    lost_reports = relationship("LostReport", back_populates="user")
+    found_reports = relationship("FoundReport", back_populates="user")

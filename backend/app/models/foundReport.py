@@ -15,3 +15,5 @@ class FoundReport(Base):
     
     
     item = relationship("Item", back_populates="found_reports")
+    founder = relationship("User", back_populates="found_reports") # reference to user who found the item
+    images = relationship("Image", back_populates="found_report") # if we want to add images in future
