@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
+import { launchImageLibrary } from 'react-native-image-picker'; // <-- new import
 
 const { height } = Dimensions.get('window');
 
@@ -27,8 +28,8 @@ const CreateReportView = ({ onClose }) => {
   const [newItemName, setNewItemName] = useState('');
   const [newItemDesc, setNewItemDesc] = useState('');
 
- 
-
+  // image state
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -43,6 +44,17 @@ const CreateReportView = ({ onClose }) => {
     longitude: -122.4324,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
+  };
+
+  const pickImage = () => {
+    launchImageLibrary(
+      { mediaType: 'photo', quality: 0.7 },
+      (response) => {
+        if (!response.didCancel && !response.errorCode) {
+          setImage(response.assets[0]);
+        }
+      }
+    );
   };
 
   return (
@@ -195,30 +207,45 @@ const CreateReportView = ({ onClose }) => {
           </Picker>
         </View>
 
+        {/* IMAGE PICKER */}
+        <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+          <Text style={styles.imageButtonText}>
+            {image ? 'Change Image' : 'Add Image'}
+          </Text>
+        </TouchableOpacity>
+        {image && (
+          <Image
+            source={{ uri: image.uri }}
+            style={{ width: '100%', height: 200, borderRadius: 8, marginTop: 10 }}
+          />
+        )}
+
         <TouchableOpacity
           style={styles.saveButton}
           onPress={() => {
             if (existingItem) {
               handleUser('/createLostReport/', {
                 user_id: user.id,
-                item_id: 0, // placeholder for existing item ID
+                item_id: 0,
                 name,
                 longitude,
                 latitude,
                 radius,
                 description: lostItemDescription,
-                bounty: itemBounty
+                bounty: itemBounty,
+                image: image ? image.uri : null // <-- send image URI
               }, 'POST');
             } else {
               handleUser('/createLostReport/', {
                 user_id: user.id,
-                item_id: HEREHEREHERE, // how to get item_id of item just created?
+                item_id: HEREHEREHERE,
                 name,
                 longitude,
                 latitude,
                 radius,
                 description: lostItemDescription,
-                bounty: itemBounty
+                bounty: itemBounty,
+                image: image ? image.uri : null
               }, 'POST');
             }
           }}
@@ -284,6 +311,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#000',
   },
+  imageButton: {
+    backgroundColor: '#FF8C00',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  imageButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 });
 
 export default CreateReportView;

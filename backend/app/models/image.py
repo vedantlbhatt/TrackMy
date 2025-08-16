@@ -11,4 +11,5 @@ class Image(Base):
     item = relationship("Item", back_populates="image")
     
     # Currently flow goes Item->Image->Embedding
+   # found_report = relationship("FoundReport", back_populates="images")???
     

@@ -36,7 +36,6 @@ export default function Home() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* Map */}
       <MapView
         style={styles.map}
         provider={PROVIDER_GOOGLE}
@@ -61,7 +60,6 @@ export default function Home() {
         ))}
       </MapView>
 
-      {/* FAB Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setModalVisible(true)}
@@ -69,7 +67,6 @@ export default function Home() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      {/* Create Report Modal (moved outside the FAB) */}
       <Modal
         animationType="slide"
         transparent={false}
@@ -81,11 +78,10 @@ export default function Home() {
         </View>
       </Modal>
 
-      {/* Place Details Bottom Sheet */}
       <Modalize
         ref={modalRef}
         alwaysOpen={Dimensions.get('window').height * 0.25}
-        modalHeight={Dimensions.get('window').height * 0.9}
+        modalHeight={Dimensions.get('window').height * 0.9}x
         adjustToContentHeight={false}
         withHandle
       >
