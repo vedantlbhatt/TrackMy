@@ -29,6 +29,8 @@ export default function Home() {
   const modalRef = useRef(null);
   const navigation = useNavigation();
 
+  
+
   const onMarkerPress = (place) => {
     setSelectedPlace(place);
     modalRef.current?.open();

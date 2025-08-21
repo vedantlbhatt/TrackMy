@@ -56,7 +56,7 @@ def edit_found_report(report_id: int, report: FoundReportCreate, db=Depends(get_
 def delete_found_report(report_id: int, db=Depends(get_db)):
     return report_store.delete_found_report(db, report_id)
 
-@router.get("/getFoundReporByUser/{user_id}")
+@router.get("/getFoundReportByUser/{user_id}")
 def get_found_report_by_user(user_id: int, db=Depends(get_db)):
     return report_store.get_found_reports_by_user(db, user_id)
 

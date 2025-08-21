@@ -30,4 +30,4 @@ def get_items_by_user(user_id: int, db=Depends(get_db)):
 
 @router.post("/addItemByUser/")
 def add_item_by_user(item: ItemCreate,  db=Depends(get_db)):
-    return item_store.create_item(db, item.user_id, item.name)
+    return item_store.create_item(db, item.user_id, item.name, item.description)
