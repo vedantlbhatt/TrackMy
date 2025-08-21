@@ -4,17 +4,22 @@ import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
-import { launchImageLibrary } from 'react-native-image-picker'; // <-- new import
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const { height } = Dimensions.get('window');
 
+
 const CreateReportView = ({ onClose }) => {
+  // user state
   const [user, setUser] = useState(null);
-  const [existingItem, setExistingItem] = useState(false);
+
+  // map nonsense
   const [marker, setMarker] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [radius, setRadius] = useState(50);
+
+  // report state
   const [name, setName] = useState('');
   const [lostItemDescription, setLostItemDescription] = useState('');
   const [itemBounty, setItemBounty] = useState('');
@@ -24,17 +29,20 @@ const CreateReportView = ({ onClose }) => {
   const [popupVisible, setPopupVisible] = useState(true);
   const [showNewItemFields, setShowNewItemFields] = useState(false);
 
-  // case of new item
+  // new vs existing item
   const [newItemName, setNewItemName] = useState('');
   const [newItemDesc, setNewItemDesc] = useState('');
+  const [existingItem, setExistingItem] = useState(false);
+  const [items, setItems] = useState([]); // list of existing items
+  const [selectedItemId, setSelectedItemId] = useState(null); // ID of chosen selected item
 
   // image state
   const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const user = await handleUser('/profile/', {}, 'GET');
-      setUser(user);
+      const userData = await handleUser('/profile/', {}, 'GET');
+      setUser(userData);
     };
     fetchUser();
   }, []);
@@ -47,19 +55,16 @@ const CreateReportView = ({ onClose }) => {
   };
 
   const pickImage = () => {
-    launchImageLibrary(
-      { mediaType: 'photo', quality: 0.7 },
-      (response) => {
-        if (!response.didCancel && !response.errorCode) {
-          setImage(response.assets[0]);
-        }
+    launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, (response) => {
+      if (!response.didCancel && !response.errorCode) {
+        setImage(response.assets[0]);
       }
-    );
+    });
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Create Report</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -67,24 +72,27 @@ const CreateReportView = ({ onClose }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Centered Pop-up Alert */}
+      {/* pop up */}
       <Modal
         visible={popupVisible}
         transparent
-        animationType="fade"
+        animationType="fade" //fffffade that
         onRequestClose={() => setPopupVisible(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.alertBox}>
-            {!showNewItemFields ? (
+            {/* choose from existing item */}
+            {!existingItem && !showNewItemFields && (
               <>
                 <Text style={styles.alertTitle}>Choose from stored items?</Text>
                 <View style={styles.buttonRow}>
                   <TouchableOpacity
                     style={[styles.alertButton, { backgroundColor: '#1E90FF' }]}
-                    onPress={() => { 
-                      setExistingItem(true); 
-                      setPopupVisible(false); 
+                    onPress={async () => {
+                      setExistingItem(true);
+                      const data = await handleUser('/getItemsByUser/', { user_id: user.user_id }, 'GET');
+                      const list = data || [];
+                      setItems(list);
                     }}
                   >
                     <Text style={styles.alertButtonText}>Yes</Text>
@@ -93,7 +101,7 @@ const CreateReportView = ({ onClose }) => {
                   <TouchableOpacity
                     style={[styles.alertButton, { backgroundColor: '#FF5722' }]}
                     onPress={() => {
-                      setShowNewItemFields(true)
+                      setShowNewItemFields(true);
                       setExistingItem(false);
                     }}
                   >
@@ -101,9 +109,12 @@ const CreateReportView = ({ onClose }) => {
                   </TouchableOpacity>
                 </View>
               </>
-            ) : (
+            )}
+
+            {/* case with new item */}
+            {showNewItemFields && (
               <>
-                <Text style={styles.alertTitle}>Add a New Item</Text> 
+                <Text style={styles.alertTitle}>Add a New Item</Text>
                 <TextInput
                   style={styles.alertInput}
                   placeholder="Item Name"
@@ -112,30 +123,73 @@ const CreateReportView = ({ onClose }) => {
                   onChangeText={setNewItemName}
                 />
                 <TextInput
-                  style={[styles.alertInput, { height: 80, textAlignVertical: 'top' }]}
-                  placeholder="Description / Notes"
+                  style={[
+                    styles.alertInput,
+                    { height: 80, textAlignVertical: 'top' },
+                  ]}
+                  placeholder="Description of item"
                   placeholderTextColor="#888"
                   multiline
                   value={newItemDesc}
                   onChangeText={setNewItemDesc}
                 />
                 <TouchableOpacity
-                  style={[styles.alertButton, { backgroundColor: '#1E90FF', marginTop: 10 }]}
-                  onPress={() => {
-                    setExistingItem(false);
+                  style={[
+                    styles.alertButton,
+                    { backgroundColor: '#1E90FF', marginTop: 10 },
+                  ]}
+                  onPress={async () => {
+
+                    newItem = await handleUser('/addItemByUser/', {
+                      user_id: user.user_id,
+                      name: newItemName,
+                      description: newItemDesc,
+                    }, 'POST');
+                    setSelectedItemId(newItem.item_id);
+                    setLostItemDescription(newItemDesc);
+                    setName(newItemName);
                     setPopupVisible(false);
-                    handleUser('/addItemByUser/', {user_id: user.user_id, name: newItemName}, 'POST');
                   }}
                 >
                   <Text style={styles.alertButtonText}>Continue</Text>
                 </TouchableOpacity>
               </>
             )}
+
+            {/* show list of existing item */}
+            {existingItem && items.length > 0 && (
+              <>
+                <Text style={styles.alertTitle}>Select an Item</Text>
+                <ScrollView style={{ maxHeight: 200 }}>
+                  {items.map((item) => (
+                    <TouchableOpacity
+                      key={item.id || item.item_id}
+                      style={{
+                        padding: 10,
+                        marginVertical: 5,
+                        borderRadius: 8,
+                        backgroundColor: '#eee',
+                      }}
+                      onPress={() => {
+                        console.log("buddd", item.description);
+                        setSelectedItemId(item.item_id);
+                        setLostItemDescription(item.description);
+                        setName(item.name); 
+                        setPopupVisible(false);
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, color: '#333' }}>
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
           </View>
         </View>
       </Modal>
 
-      {/* Main Content */}
       <ScrollView contentContainerStyle={styles.content}>
         <MapView
           style={styles.map}
@@ -207,7 +261,7 @@ const CreateReportView = ({ onClose }) => {
           </Picker>
         </View>
 
-        {/* IMAGE PICKER */}
+        {/* image picking */}
         <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
           <Text style={styles.imageButtonText}>
             {image ? 'Change Image' : 'Add Image'}
@@ -216,38 +270,33 @@ const CreateReportView = ({ onClose }) => {
         {image && (
           <Image
             source={{ uri: image.uri }}
-            style={{ width: '100%', height: 200, borderRadius: 8, marginTop: 10 }}
+            style={{
+              width: '100%',
+              height: 200,
+              borderRadius: 8,
+              marginTop: 10,
+            }}
           />
         )}
 
         <TouchableOpacity
           style={styles.saveButton}
           onPress={() => {
-            if (existingItem) {
-              handleUser('/createLostReport/', {
+            handleUser(
+              '/createLostReport/',
+              {
                 user_id: user.id,
-                item_id: 0,
+                item_id: selectedItemId ?? 0, // use chosen ID if exists
                 name,
                 longitude,
                 latitude,
                 radius,
                 description: lostItemDescription,
                 bounty: itemBounty,
-                image: image ? image.uri : null // <-- send image URI
-              }, 'POST');
-            } else {
-              handleUser('/createLostReport/', {
-                user_id: user.id,
-                item_id: HEREHEREHERE,
-                name,
-                longitude,
-                latitude,
-                radius,
-                description: lostItemDescription,
-                bounty: itemBounty,
-                image: image ? image.uri : null
-              }, 'POST');
-            }
+                image: image ? image.uri : null,
+              },
+              'POST'
+            );
           }}
         >
           <Text style={styles.saveButtonText}>Submit Report</Text>
@@ -256,6 +305,7 @@ const CreateReportView = ({ onClose }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2C2C2C' },

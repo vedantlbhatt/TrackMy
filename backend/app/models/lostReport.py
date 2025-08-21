@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR
+from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from datetime import datetime
+from sqlalchemy.sql import func
 
 #create a view that joins item, lostReport, image (maybe image embedding) for easier access later amundo!
 #*
@@ -21,6 +23,7 @@ class LostReport(Base):
     latitude = Column(DECIMAL(9,6), nullable = True)
     radius = Column(Integer, nullable = True)
     bounty = Column(DECIMAL(6,2), nullable = True)
+    created_at = Column(DateTime, default=func.now()) 
     
     
     item = relationship("Item", back_populates="lost_reports")
