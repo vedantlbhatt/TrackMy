@@ -5,9 +5,22 @@ import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
 import { launchImageLibrary } from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 const { height } = Dimensions.get('window');
 
+const pickImage = async () => {
+  console.log("eded");
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images", "videos"],
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  console.log("result", result);
+  setImage(result.assets[0].uri);
+};
 
 const CreateReportView = ({ onClose }) => {
   // user state
@@ -38,6 +51,7 @@ const CreateReportView = ({ onClose }) => {
 
   // image state
   const [image, setImage] = useState(null);
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -54,13 +68,7 @@ const CreateReportView = ({ onClose }) => {
     longitudeDelta: 0.01,
   };
 
-  const pickImage = () => {
-    launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, (response) => {
-      if (!response.didCancel && !response.errorCode) {
-        setImage(response.assets[0]);
-      }
-    });
-  };
+  
 
   return (
     <View style={styles.container}>
@@ -278,7 +286,10 @@ const CreateReportView = ({ onClose }) => {
             }}
           />
         )}
-
+      <View style = {styles.previewContainer}>
+        <Image source={{uri: image}} style = {styles.image}></Image>
+      </View>
+      
         <TouchableOpacity
           style={styles.saveButton}
           onPress={() => {
@@ -286,14 +297,14 @@ const CreateReportView = ({ onClose }) => {
               '/createLostReport/',
               {
                 user_id: user.id,
-                item_id: selectedItemId ?? 0, // use chosen ID if exists
+                item_id: selectedItemId, // use chosen ID if exists
                 name,
                 longitude,
                 latitude,
                 radius,
                 description: lostItemDescription,
                 bounty: itemBounty,
-                image: image ? image.uri : null,
+                //image: image ? image.uri : null,
               },
               'POST'
             );
@@ -317,6 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  image: {width: '100%', height: 200, borderRadius: 8},
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', flex: 1, textAlign: 'center' },
   closeButton: { position: 'absolute', right: 16, top: 16 },
   closeButtonText: { fontSize: 16, color: '#333' },
@@ -347,7 +359,6 @@ const styles = StyleSheet.create({
   },
   saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 
-  // Alert styles
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   alertBox: { width: '85%', backgroundColor: '#FFF', borderRadius: 12, padding: 20, elevation: 6 },
   alertTitle: { fontSize: 18, fontWeight: '600', textAlign: 'center', color: '#333', marginBottom: 16 },
