@@ -9,20 +9,23 @@ import * as ImagePicker from 'expo-image-picker';
 
 const { height } = Dimensions.get('window');
 
-const pickImage = async () => {
-  console.log("eded");
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ["images", "videos"],
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-  });
-
-  console.log("result", result);
-  setImage(result.assets[0].uri);
-};
-
 const CreateReportView = ({ onClose }) => {
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // NEW: allow selecting multiple images
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+  
+    if (!result.canceled) {
+      const uris = result.assets.map((asset) => asset.uri);
+      setImages((prev) => [...prev, ...uris]);
+    }
+  };
+  
   // user state
   const [user, setUser] = useState(null);
 
@@ -50,7 +53,8 @@ const CreateReportView = ({ onClose }) => {
   const [selectedItemId, setSelectedItemId] = useState(null); // ID of chosen selected item
 
   // image state
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]); 
+
   
 
   useEffect(() => {
@@ -271,24 +275,24 @@ const CreateReportView = ({ onClose }) => {
 
         {/* image picking */}
         <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-          <Text style={styles.imageButtonText}>
-            {image ? 'Change Image' : 'Add Image'}
-          </Text>
-        </TouchableOpacity>
-        {image && (
-          <Image
-            source={{ uri: image.uri }}
-            style={{
-              width: '100%',
-              height: 200,
-              borderRadius: 8,
-              marginTop: 10,
-            }}
-          />
-        )}
-      <View style = {styles.previewContainer}>
-        <Image source={{uri: image}} style = {styles.image}></Image>
-      </View>
+  <Text style={styles.imageButtonText}>
+    {images.length > 0 ? 'Add More Images' : 'Add Image'}
+  </Text>
+</TouchableOpacity>
+
+        
+        <ScrollView horizontal 
+          style={styles.previewContainer} 
+          contentContainerStyle={{ paddingVertical: 10 }}
+          showsHorizontalScrollIndicator={false}
+        >
+          {images.map((uri, index) => (
+            <View key={index} style={styles.thumbnailWrapper}>
+              <Image source={{ uri }} style={styles.thumbnail} />
+            </View>
+          ))}
+      </ScrollView>
+
       
         <TouchableOpacity
           style={styles.saveButton}
@@ -357,6 +361,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 16,
   },
+  previewContainer: {
+    marginTop: 16,
+  },
+  thumbnailWrapper: {
+    marginRight: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  thumbnail: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+  },  
   saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
