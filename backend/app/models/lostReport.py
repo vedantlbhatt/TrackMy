@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR, DateTime, Float
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from datetime import datetime
@@ -14,16 +14,17 @@ from sqlalchemy.sql import func
 
 class LostReport(Base):
     __tablename__ = "lost_reports"
-    lost_report_id = Column(Integer, primary_key = True, index = True, nullable = False)
-    lost_item_id = Column(Integer, ForeignKey("items.item_id"), index = True, nullable = False) # rename to item_id
-    user_id = Column(Integer, ForeignKey("users.user_id"), index = True, nullable = False) # reference to user who lost the item
-    title = Column(String(255), nullable = False) 
-    lost_report_description = Column(VARCHAR(1000), nullable = True) # rename to description
-    longitude = Column(DECIMAL(8,6), nullable = True)
-    latitude = Column(DECIMAL(9,6), nullable = True)
-    radius = Column(Integer, nullable = True)
-    bounty = Column(DECIMAL(6,2), nullable = True)
-    created_at = Column(DateTime, default=func.now()) 
+    lost_report_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    item_id = Column(Integer, ForeignKey("items.item_id"), index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id"), index=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(VARCHAR(1000), nullable=True)
+    longitude = Column(Float, nullable=True)
+    latitude = Column(Float, nullable=True)
+    radius = Column(Integer, nullable=True)
+    bounty = Column(DECIMAL(6,2), nullable=True)
+    created_at = Column(DateTime, default=func.now())
+
     
     
     item = relationship("Item", back_populates="lost_reports")

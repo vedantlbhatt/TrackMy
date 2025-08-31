@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR
+from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, VARCHAR, Float
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -8,8 +8,8 @@ class FoundReport(Base):
     founder_id = Column(Integer, ForeignKey("users.user_id"), index = True, nullable = False) # tracks person who found the item
     found_item_id = Column(Integer, ForeignKey("items.item_id"), index = True, nullable = False)
     found_report_description = Column(VARCHAR(1000), nullable = True)
-    longitude = Column(DECIMAL(8,6), nullable = True)
-    latitude = Column(DECIMAL(9,6), nullable = True)
+    longitude = Column(Float, nullable=True)
+    latitude = Column(Float, nullable=True)
     radius = Column(Integer, nullable = True)
     request_bounty = Column(DECIMAL(6,2), nullable = True) # case where item is found before report and founder asks for bounty
     

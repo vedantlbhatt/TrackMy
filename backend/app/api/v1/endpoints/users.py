@@ -21,8 +21,6 @@ def get_db():
 
 @router.post("/signup/")
 def add_user(user: SignupRequest, db=Depends(get_db)):
-    print("Received user:", user)
-    print("googoo") # why cant i delete this
     return user_store.create_user(db, user.email, user.user_name, user.password) #should this be create user or sign up??
 
 @router.post("/login/")
