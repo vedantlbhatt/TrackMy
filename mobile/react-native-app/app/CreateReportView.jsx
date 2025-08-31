@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image, Icon } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
-import { launchImageLibrary } from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 const { height } = Dimensions.get('window');
 
@@ -14,22 +15,22 @@ const CreateReportView = ({ onClose }) => {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
-      allowsMultipleSelection: true, 
+      allowsMultipleSelection: true,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
     });
-  
+
     if (!result.canceled) {
       const uris = result.assets.map((asset) => asset.uri);
       setImages((prev) => [...prev, ...uris]);
     }
   };
-  
+
   // user state
   const [user, setUser] = useState(null);
 
-  // map nonsense
+  // map state
   const [marker, setMarker] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [latitude, setLatitude] = useState(null);
@@ -53,9 +54,7 @@ const CreateReportView = ({ onClose }) => {
   const [selectedItemId, setSelectedItemId] = useState(null); // ID of chosen selected item
 
   // image state
-  const [images, setImages] = useState([]); 
-
-  
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -72,28 +71,28 @@ const CreateReportView = ({ onClose }) => {
     longitudeDelta: 0.01,
   };
 
-  
-
   return (
     <View style={styles.container}>
-      {/* header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Create Report</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>X</Text>
+
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={onClose} style={styles.headerCancelButton}>
+          <Text style={styles.headerCancelText}>Cancel</Text>
         </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Create Report</Text>
+        </View>
+        <View style={{ width: 72 }} /> 
+
       </View>
 
-      {/* pop up */}
       <Modal
         visible={popupVisible}
         transparent
-        animationType="fade" //fffffade that
+        animationType="fade"
         onRequestClose={() => setPopupVisible(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.alertBox}>
-            {/* choose from existing item */}
             {!existingItem && !showNewItemFields && (
               <>
                 <Text style={styles.alertTitle}>Choose from stored items?</Text>
@@ -109,7 +108,6 @@ const CreateReportView = ({ onClose }) => {
                   >
                     <Text style={styles.alertButtonText}>Yes</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     style={[styles.alertButton, { backgroundColor: '#FF5722' }]}
                     onPress={() => {
@@ -123,7 +121,6 @@ const CreateReportView = ({ onClose }) => {
               </>
             )}
 
-            {/* case with new item */}
             {showNewItemFields && (
               <>
                 <Text style={styles.alertTitle}>Add a New Item</Text>
@@ -151,8 +148,7 @@ const CreateReportView = ({ onClose }) => {
                     { backgroundColor: '#1E90FF', marginTop: 10 },
                   ]}
                   onPress={async () => {
-                  
-                    newItem = await handleUser('/addItemByUser/', {
+                    const newItem = await handleUser('/addItemByUser/', {
                       user_id: user.user_id,
                       name: newItemName,
                       description: newItemDesc,
@@ -168,7 +164,6 @@ const CreateReportView = ({ onClose }) => {
               </>
             )}
 
-            {/* show list of existing item */}
             {existingItem && items.length > 0 && (
               <>
                 <Text style={styles.alertTitle}>Select an Item</Text>
@@ -183,10 +178,9 @@ const CreateReportView = ({ onClose }) => {
                         backgroundColor: '#eee',
                       }}
                       onPress={() => {
-                        console.log("buddd", item.description);
                         setSelectedItemId(item.item_id);
                         setLostItemDescription(item.description);
-                        setName(item.name); 
+                        setName(item.name);
                         setPopupVisible(false);
                       }}
                     >
@@ -223,7 +217,7 @@ const CreateReportView = ({ onClose }) => {
         <TextInput
           style={styles.input}
           placeholder="Lost Item Name"
-          placeholderTextColor="#CCC"
+          placeholderTextColor="#AAAAAA"
           value={name}
           onChangeText={setName}
         />
@@ -231,7 +225,7 @@ const CreateReportView = ({ onClose }) => {
         <TextInput
           style={styles.descriptionInput}
           placeholder="Lost Item Description"
-          placeholderTextColor="#CCC"
+          placeholderTextColor="#AAAAAA"
           value={lostItemDescription}
           onChangeText={setLostItemDescription}
           multiline
@@ -240,7 +234,7 @@ const CreateReportView = ({ onClose }) => {
         <TextInput
           style={styles.input}
           placeholder="Bounty (Optional)"
-          placeholderTextColor="#CCC"
+          placeholderTextColor="#AAAAAA"
           value={itemBounty}
           onChangeText={setItemBounty}
           keyboardType="numeric"
@@ -266,6 +260,7 @@ const CreateReportView = ({ onClose }) => {
             selectedValue={visibility}
             style={styles.dropdown}
             onValueChange={(itemValue) => setVisibility(itemValue)}
+            dropdownIconColor="#FFF"
           >
             <Picker.Item label="Public" value="Public" />
             <Picker.Item label="Friends Only" value="Friends" />
@@ -273,16 +268,17 @@ const CreateReportView = ({ onClose }) => {
           </Picker>
         </View>
 
-        {/* image picking */}
-        <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-  <Text style={styles.imageButtonText}>
-    {images.length > 0 ? 'Add More Images' : 'Add Image'}
+        <TouchableOpacity style={styles.addImageDashed} onPress={pickImage}>
+  <FontAwesome name="image" size={36} color="#0096FF" />
+  <Text style={styles.addImageDashedText}>
+    {images.length > 0 ? 'Add More Photos/Video' : 'Add Photos/Video'}
   </Text>
 </TouchableOpacity>
 
-        
-        <ScrollView horizontal 
-          style={styles.previewContainer} 
+
+
+        <ScrollView horizontal
+          style={styles.previewContainer}
           contentContainerStyle={{ paddingVertical: 10 }}
           showsHorizontalScrollIndicator={false}
         >
@@ -291,23 +287,13 @@ const CreateReportView = ({ onClose }) => {
               <Image source={{ uri }} style={styles.thumbnail} />
             </View>
           ))}
-      </ScrollView>
+        </ScrollView>
 
-      
         <TouchableOpacity
           style={styles.saveButton}
-          onPress={() => {
-            console.log({
-              user_id: user.user_id,
-              item_id: selectedItemId,
-              title: name,
-              description: lostItemDescription,
-              longitude: longitude,
-              latitude: latitude,
-              radius: radius,
-              bounty: itemBounty,
-            });
-            handleUser('/createLostReport/', {
+          onPress={async () => {
+            itemBounty == null ? setItemBounty(0) : itemBounty;
+            await handleUser('/createLostReport/', {
               user_id: Number(user.user_id),
               item_id: Number(selectedItemId),
               title: String(name),
@@ -317,10 +303,19 @@ const CreateReportView = ({ onClose }) => {
               radius: parseFloat(radius),
               bounty: parseFloat(itemBounty),
             }, 'POST');
-            
-            //console.log(user.user_id, selectedItemId, name, longitude, latitude, radius, lostItemDescription, itemBounty);
+            for (let i = 0; i < images.length; i++) {
+              console.log("uri:",
+                images[i])
+              await handleUser('/addImage/', {
+                item_id: selectedItemId,
+                url: images[i],
+                faiss_id: null,
+              }, 'POST')
+            }
+            onClose()
           }}
         >
+
           <Text style={styles.saveButtonText}>Submit Report</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -328,84 +323,162 @@ const CreateReportView = ({ onClose }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2C2C2C' },
-  header: {
-    backgroundColor: '#DDD',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+  container: { flex: 1, backgroundColor: '#181818' },
+
+  headerContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: '#363636',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#222',
+  },
+  headerCancelButton: { paddingHorizontal: 20, zIndex: 2 },
+  headerCancelText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '400'
+  },
+  headerTitleContainer: { 
+    flex: 1, 
+    alignItems: 'center',
+    marginRight: 24
+   },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textAlign: 'center'
+  },
+
+
+  content: { padding: 18, paddingBottom: 60 },
+
+  map: { height: height * 0.24, borderRadius: 10, marginBottom: 16, overflow: 'hidden' },
+
+  input: {
+    backgroundColor: '#232323',
+    color: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: '#303030',
+    fontSize: 16,
+  },
+  descriptionInput: {
+    backgroundColor: '#232323',
+    color: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 18,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: '#303030',
+    fontSize: 16,
+  },
+
+  sliderContainer: { marginBottom: 16 },
+  sliderLabel: { color: '#DDD', marginBottom: 6, fontWeight: '500' },
+  slider: { width: '100%' },
+
+  dropdownContainer: { marginBottom: 18 },
+  dropdownLabel: { color: '#DDD', marginBottom: 7, fontWeight: '500' },
+  dropdown: {
+    backgroundColor: '#232323',
+    color: '#fff',
+    borderRadius: 10,
+    padding: 0,
+    borderColor: '#303030',
+    borderWidth: 1,
+  },
+
+
+  addImageDashed: {
+    borderWidth: 2,
+    borderColor: '#0096FF',
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    paddingVertical: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 18,
+    backgroundColor: '#1a1a1a',
+    width: '100%',
   },
-  image: {width: '100%', height: 200, borderRadius: 8},
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', flex: 1, textAlign: 'center' },
-  closeButton: { position: 'absolute', right: 16, top: 16 },
-  closeButtonText: { fontSize: 16, color: '#333' },
-  content: { padding: 16 },
-  map: { height: height * 0.3, borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
-  input: { backgroundColor: '#444', color: '#FFF', padding: 12, borderRadius: 8, marginBottom: 16 },
-  descriptionInput: {
-    backgroundColor: '#444',
-    color: '#FFF',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
+  addImageDashedText: {
+    color: '#0096FF',
+    fontWeight: 'bold',
+    marginTop: 8,
+    fontSize: 17,
   },
-  sliderContainer: { marginBottom: 16 },
-  sliderLabel: { color: '#FFF', marginBottom: 8 },
-  slider: { width: '100%' },
-  dropdownContainer: { marginBottom: 16 },
-  dropdownLabel: { color: '#FFF', marginBottom: 8 },
-  dropdown: { backgroundColor: '#444', color: '#FFF', borderRadius: 8 },
-  saveButton: {
-    backgroundColor: '#1E90FF',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
+  addImageIcon: {
+    width: 36,
+    height: 36,
+    tintColor: '#0096FF',
+    resizeMode: 'contain',
   },
-  previewContainer: {
-    marginTop: 16,
-  },
+
+  previewContainer: { marginTop: 4 },
   thumbnailWrapper: {
     marginRight: 10,
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#444',
+    backgroundColor: '#121212'
   },
   thumbnail: {
-    width: 100,
-    height: 100,
+    width: 92,
+    height: 92,
     resizeMode: 'cover',
-  },  
-  saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+    borderRadius: 8,
+  },
 
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  alertBox: { width: '85%', backgroundColor: '#FFF', borderRadius: 12, padding: 20, elevation: 6 },
-  alertTitle: { fontSize: 18, fontWeight: '600', textAlign: 'center', color: '#333', marginBottom: 16 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  alertButton: { flex: 1, paddingVertical: 10, borderRadius: 8, marginHorizontal: 5 },
-  alertButtonText: { color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 16 },
-  alertInput: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    color: '#000',
-  },
-  imageButton: {
-    backgroundColor: '#FF8C00',
-    paddingVertical: 12,
-    borderRadius: 8,
+  saveButton: {
+    backgroundColor: '#0096FF', 
+    paddingVertical: 16,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 28,
+    marginBottom: 40,
+    opacity: 1
   },
-  imageButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  saveButtonText: { color: '#FFF', fontSize: 17, fontWeight: '600' },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.62)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  alertBox: {
+    width: '87%',
+    backgroundColor: '#222',
+    borderRadius: 14,
+    padding: 22,
+    elevation: 10
+  },
+  alertTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: '#FFF',
+    marginBottom: 15
+  },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  alertButton: { flex: 1, paddingVertical: 12, borderRadius: 8, marginHorizontal: 7 },
+  alertButtonText: { color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: 17 },
+  alertInput: {
+    backgroundColor: '#191919',
+    borderRadius: 10,
+    padding: 11,
+    marginBottom: 12,
+    color: '#fff'
+  },
 });
 
 export default CreateReportView;
