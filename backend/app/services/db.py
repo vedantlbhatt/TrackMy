@@ -66,15 +66,16 @@ class item_store:
 
 class report_store:
 
-    def create_lost_report(db, user_id, item_id, name, description, longitude, latitude, radius, bounty):
+    def create_lost_report(db, user_id, item_id, title, description, longitude, latitude, radius, bounty):
         report = LostReport(
             user_id=user_id,
             item_id=item_id,
-            name=name,
+            title=title,
             description=description,
             longitude=longitude,
             latitude=latitude,
-            radius=radius
+            radius=radius,
+            bounty=bounty
         )
         db.add(report)
         db.commit()

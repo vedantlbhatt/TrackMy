@@ -13,8 +13,8 @@ const CreateReportView = ({ onClose }) => {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true, // NEW: allow selecting multiple images
+      mediaTypes: ["images", "videos"],
+      allowsMultipleSelection: true, 
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -151,7 +151,7 @@ const CreateReportView = ({ onClose }) => {
                     { backgroundColor: '#1E90FF', marginTop: 10 },
                   ]}
                   onPress={async () => {
-
+                  
                     newItem = await handleUser('/addItemByUser/', {
                       user_id: user.user_id,
                       name: newItemName,
@@ -297,21 +297,28 @@ const CreateReportView = ({ onClose }) => {
         <TouchableOpacity
           style={styles.saveButton}
           onPress={() => {
-            handleUser(
-              '/createLostReport/',
-              {
-                user_id: user.id,
-                item_id: selectedItemId, // use chosen ID if exists
-                name,
-                longitude,
-                latitude,
-                radius,
-                description: lostItemDescription,
-                bounty: itemBounty,
-                //image: image ? image.uri : null,
-              },
-              'POST'
-            );
+            console.log({
+              user_id: user.user_id,
+              item_id: selectedItemId,
+              title: name,
+              description: lostItemDescription,
+              longitude: longitude,
+              latitude: latitude,
+              radius: radius,
+              bounty: itemBounty,
+            });
+            handleUser('/createLostReport/', {
+              user_id: Number(user.user_id),
+              item_id: Number(selectedItemId),
+              title: String(name),
+              description: String(lostItemDescription),
+              longitude: parseFloat(longitude),
+              latitude: parseFloat(latitude),
+              radius: parseFloat(radius),
+              bounty: parseFloat(itemBounty),
+            }, 'POST');
+            
+            //console.log(user.user_id, selectedItemId, name, longitude, latitude, radius, lostItemDescription, itemBounty);
           }}
         >
           <Text style={styles.saveButtonText}>Submit Report</Text>

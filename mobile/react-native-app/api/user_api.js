@@ -21,6 +21,7 @@ export const handleLogin = async(data = {}) => {
 
         config.data = data;
 
+
         await AsyncStorage.removeItem('access_token');
         const response = await axiosInstance.request(config);
         if (!(response)) {
@@ -32,7 +33,7 @@ export const handleLogin = async(data = {}) => {
           return None
         }
         
-
+        
         return response.data;
 
   } catch (error) {
@@ -43,7 +44,7 @@ export const handleLogin = async(data = {}) => {
 export const apiRequest = async (endpoint, data = {}, method) => {
   try {
     const config = {
-      url: endpoint,
+      url: API_URL + endpoint,
       method,
     };
 
@@ -61,7 +62,8 @@ export const apiRequest = async (endpoint, data = {}, method) => {
       };
     }
 
-    console.log("Request config:", config); 
+    //console.log("Request config:", config); 
+    console.log("url be like: ", config.url)
 
     const response = await axiosInstance.request(config);
 
