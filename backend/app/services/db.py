@@ -2,6 +2,7 @@ from app.models.user import User
 from app.models.item import Item
 from app.models.lostReport import LostReport
 from app.models.foundReport import FoundReport
+from app.models.image import Image
 from fastapi import HTTPException, status
 import bcrypt
 
@@ -147,6 +148,19 @@ class report_store:
     
     def get_found_reports_by_user(db, user_id):
         return db.query(FoundReport).filter(FoundReport.user_id == user_id).all()
+    
+class image_store:
+
+    def add_image(db, item_id, url, faiss_id):
+        image = Image(
+            item_id=item_id,
+            url=url,
+            faiss_id=faiss_id,
+        )
+        db.add(image)
+        db.commit()
+        db.refresh(image)
+        return image
     
 
 

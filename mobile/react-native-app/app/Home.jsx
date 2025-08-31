@@ -1,10 +1,26 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, createContext,useContext } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Modalize } from 'react-native-modalize';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import CreateReportView from './CreateReportView';
+
+
+
+const ModalVisibilityContext = createContext();
+
+export const ModalVisibilityProvider = ({ children }) => {
+  const [popupVisible, setPopupVisible] = useState(false);
+  return (
+    <ModalVisibilityContext.Provider value={{ popupVisible, setPopupVisible }}>
+      {children}
+    </ModalVisibilityContext.Provider>
+  );
+};
+
+export const useModalVisibility = () => useContext(ModalVisibilityContext);
+
 
 const places = [
   {
