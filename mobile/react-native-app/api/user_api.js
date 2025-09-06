@@ -63,7 +63,7 @@ export const apiRequest = async (endpoint, data = {}, method) => {
     }
 
     //console.log("Request config:", config); 
-    console.log("url be like: ", config.url)
+
 
     const response = await axiosInstance.request(config);
 
@@ -71,7 +71,7 @@ export const apiRequest = async (endpoint, data = {}, method) => {
     //  await AsyncStorage.setItem('access_token', response.data.access_token);
     //}
 
-    console.log("response:", response.data)
+    //console.log("response:", response.data)
     return response.data;
 
   } catch (error) {

@@ -6,11 +6,12 @@ import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome } from '@expo/vector-icons';
+import * as Location from "expo-location";
 
 
 const { height } = Dimensions.get('window');
 
-const CreateReportView = ({ onClose }) => {
+const CreateReportView = ({ onClose, location }) => {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -52,9 +53,12 @@ const CreateReportView = ({ onClose }) => {
   const [existingItem, setExistingItem] = useState(false);
   const [items, setItems] = useState([]); // list of existing items
   const [selectedItemId, setSelectedItemId] = useState(null); // ID of chosen selected item
+  const [errorMsg, setErrorMsg] = useState(null);
 
   // image state
   const [images, setImages] = useState([]);
+
+   
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -66,8 +70,8 @@ const CreateReportView = ({ onClose }) => {
 
   const region = {
     latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.01,
+    longitude: location.longitude || -122.4324,
+    latitudeDelta: location.latitude || 33,
     longitudeDelta: 0.01,
   };
 
@@ -197,22 +201,35 @@ const CreateReportView = ({ onClose }) => {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <MapView
-          style={styles.map}
-          initialRegion={region}
-          onPress={(e) => {
-            setMarker(e.nativeEvent.coordinate);
-            setLatitude(e.nativeEvent.coordinate.latitude);
-            setLongitude(e.nativeEvent.coordinate.longitude);
-          }}
-        >
-          {marker && (
-            <>
-              <Marker coordinate={marker} />
-              <Circle center={marker} radius={radius} />
-            </>
-          )}
-        </MapView>
+      {location ? (
+  <MapView
+    showsUserLocation={true}
+    style={styles.map}
+    region={{
+      latitude: location.latitude,
+      longitude: location.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    }}
+    onPress={(e) => {
+      setMarker(e.nativeEvent.coordinate);
+      setLatitude(e.nativeEvent.coordinate.latitude);
+      setLongitude(e.nativeEvent.coordinate.longitude);
+    }}
+  >
+    {marker && (
+      <>
+        <Marker coordinate={marker} />
+        <Circle center={marker} radius={radius} />
+      </>
+    )}
+  </MapView>
+) : (
+  <View style={[styles.map, { justifyContent: 'center', alignItems: 'center' }]}>
+    <Text style={{ color: '#FFF' }}>Fetching location...</Text>
+  </View>
+)}
+
 
         <TextInput
           style={styles.input}

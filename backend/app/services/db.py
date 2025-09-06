@@ -108,32 +108,34 @@ class report_store:
     def get_lost_reports_by_user(db, user_id):
         return db.query(LostReport).filter(LostReport.user_id == user_id).all()
     
+    def get_all_lost_reports(db):
+        return db.query(LostReport).all()
     
-    def create_found_report(db, user_id, item_id, name, description, longitude, latitude, radius, bounty):
+    
+    def create_found_report(db, user_id, item_id, title, description, longitude, latitude, radius):
         report = FoundReport(
             founder_id=user_id,
             item_id=item_id,
-            description=name,
+            title = title,
+            description=description,
             longitude=longitude,
             latitude=latitude,
             radius=radius,
-            request_bounty=bounty
         )
         db.add(report)
         db.commit()
         db.refresh(report)
         return report
     
-    def edit_found_report(db, report_id, name, description, longitude, latitude, radius, bounty):
+    def edit_found_report(db, report_id, title, description, longitude, latitude, radius, bounty):
         report = db.query(FoundReport).filter(FoundReport.report_id == report_id).first()
         if not report:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report not found")
-        report.name = name
+        report.title = title
         report.description = description
         report.longitude = longitude
         report.latitude = latitude
         report.radius = radius
-        report.request_bounty = bounty
         db.commit()
         db.refresh(report)
         return report
