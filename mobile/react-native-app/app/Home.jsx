@@ -1,6 +1,6 @@
-import React, { useState, useRef, createContext,useContext, useEffect } from 'react';
+import React, { useState, useRef, createContext,useContext, useEffect} from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE, Circle } from 'react-native-maps';
 import { Modalize } from 'react-native-modalize';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -109,7 +109,8 @@ export default function Home() {
                   longitude: parseFloat(report.longitude),
                 },
                 description: report.description,
-                bounty: report.bounty
+                bounty: report.bounty,
+                radius: report.radius
               });
               titles.push(report.title);
             }
@@ -132,6 +133,8 @@ export default function Home() {
   const onMarkerPress = (report) => {
     setSelectedReport(report);
     setShowSelectedReport(true);
+
+    //show radius on map
     modalRef.current?.open();
   };
 
@@ -148,7 +151,18 @@ export default function Home() {
       longitudeDelta: 0.01,
     }}
     showsUserLocation={true}
-  >
+  > 
+  {showSelectedReport && selectedReport?.coordinate && (
+  <Circle
+    center={selectedReport.coordinate}
+    radius={selectedReport.radius || 0}
+    strokeColor="#007AFF"
+    fillColor="rgba(0,122,255,0.1)"
+  />
+)}
+
+    
+
     {reportLocs.map((report) => (
       <Marker
         key={report.id}
@@ -156,6 +170,7 @@ export default function Home() {
         title={report.title}
         description = {report.description}
         bounty = {report.bounty}
+        radius = {report.radius}
         onPress={() => onMarkerPress(report)}
       />
     ))}
