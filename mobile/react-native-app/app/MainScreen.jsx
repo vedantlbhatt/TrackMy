@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Home from './Home';
+import Home from './nav/Home';
 import CreateReportView from './CreateReportView';
 
 const MainScreen = () => {
