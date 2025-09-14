@@ -11,6 +11,7 @@ import CreateFoundReportView from '../CreateFoundReportView';
 import { handleUser } from '../../api/user_api';
 import * as Location from "expo-location";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import SubmitClaimScreen from '../SubmitClaimScreen';
 
 const ModalVisibilityContext = createContext();
 
@@ -184,6 +185,19 @@ export default function Home() {
             <CreateFoundReportView
               onClose={() => setFoundReportModalVisible(false)}
               location={location}
+            />
+          </View>
+        </Modal>
+
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={claimFormModalVisible}
+          onRequestClose={() => setClaimFormModalVisible(false)}
+        >
+          <View style={styles.modalBackground}>
+            <SubmitClaimScreen
+              onClose={() => setClaimFormModalVisible(false)}
             />
           </View>
         </Modal>
