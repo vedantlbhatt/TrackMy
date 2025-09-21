@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { handleUser, handleLogin } from '../api/user_api';
+import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 
 
@@ -12,11 +13,12 @@ export default function Auth() {
     const [userData, setUserData] = useState('')
     const navigation = useNavigation();
     const [showSignUpInputs, setShowInputs] = useState(false);
+    const router = useRouter();
 
     const handlepoops = async () => {
         request = await handleLogin({email, password})
         if (request) {
-          navigation.replace('Home'); // Navigate on success
+          router.replace('/nav/Home'); // Navigate on success
         } else {
           alert('Please enter email and password');
         }

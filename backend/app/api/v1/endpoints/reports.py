@@ -36,19 +36,22 @@ def delete_lost_report(report_id: int, db=Depends(get_db)):
 def get_lost_report_by_user(user_id: int, db=Depends(get_db)):
     return report_store.get_lost_reports_by_user(db, user_id)
 
+@router.get("/getAllLostReports/")
+def get_all_lost_reports(db=Depends(get_db)):
+    return report_store.get_all_lost_reports(db)
+
 
 #found report endpoints
 @router.post("/createFoundReport/")
 def create_found_report(report: FoundReportCreate, db=Depends(get_db)):
     return report_store.create_found_report(db, report.founder_id, report.item_id, report.title, 
                                        report.description, report.longitude, report.latitude, 
-                                       report.radius, report.request_bounty)
+                                       report.radius)
 
 @router.put("/editFoundReport/{report_id}")
 def edit_found_report(report_id: int, report: FoundReportCreate, db=Depends(get_db)):
-    return report_store.edit_found_report(db, report_id, report.name, report.description, 
-                                     report.longitude, report.latitude, report.radius, 
-                                     report.request_bounty)
+    return report_store.edit_found_report(db, report_id, report.title, report.description, 
+                                     report.longitude, report.latitude, report.radius)
 
 @router.delete("/deleteFoundReport/{report_id}")
 def delete_found_report(report_id: int, db=Depends(get_db)):

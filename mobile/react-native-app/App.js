@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Auth from './app/AuthView';
-import Home from './app/Home';
+import Home from './app/nav/Home';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,7 +25,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Dashboard">
-        {isLoggedIn ? (
+        {isLoggedin ? (
           <Stack.Screen 
           name="Login"
           component={Auth} 

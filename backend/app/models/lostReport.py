@@ -26,6 +26,5 @@ class LostReport(Base):
     created_at = Column(DateTime, default=func.now())
 
     
-    
     item = relationship("Item", back_populates="lost_reports")
     user = relationship("User", back_populates="lost_reports") # reference to user who lost the item
