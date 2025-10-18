@@ -12,6 +12,7 @@ import { handleUser } from '../../api/user_api';
 import * as Location from "expo-location";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SubmitClaimScreen from '../SubmitClaimScreen';
+import BountyClaimModal from '../../components/BountyClaimModal';
 
 const ModalVisibilityContext = createContext();
 
@@ -42,6 +43,8 @@ export default function Home() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const [claimFormModalVisible, setClaimFormModalVisible] = useState(false);
+  const [bountyClaimModalVisible, setBountyClaimModalVisible] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -64,6 +67,14 @@ export default function Home() {
         });
       return () => subscription.remove();
     })();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await handleUser('/profile/', {}, 'GET');
+      setUser(userData);
+    };
+    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -226,14 +237,25 @@ export default function Home() {
               <Text style={styles.description}>{selectedReport.description}</Text>
               <Text style={styles.description}>Bounty: {selectedReport.bounty}</Text>
 
-              <TouchableOpacity
-          onPress={() => {
-            setClaimFormModalVisible(true);
-          }}
-          style={styles.claimButton} // Add your button styling here
-        >
-          <Text style={styles.claimButtonText}>Claim</Text>
-        </TouchableOpacity>
+              {selectedReport.bounty > 0 ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setBountyClaimModalVisible(true);
+                  }}
+                  style={styles.bountyClaimButton}
+                >
+                  <Text style={styles.bountyClaimButtonText}>Claim ${selectedReport.bounty} Bounty</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    setClaimFormModalVisible(true);
+                  }}
+                  style={styles.claimButton}
+                >
+                  <Text style={styles.claimButtonText}>Claim</Text>
+                </TouchableOpacity>
+              )}
 
             </View>
           ) : (
@@ -294,6 +316,23 @@ export default function Home() {
             </View>
           </TouchableOpacity>
         )}
+
+        {/* Bounty Claim Modal */}
+        <BountyClaimModal
+          visible={bountyClaimModalVisible}
+          onClose={() => setBountyClaimModalVisible(false)}
+          onClaim={async (claimData) => {
+            try {
+              await handleUser('/create-bounty-claim', claimData, 'POST');
+              alert('Bounty claim submitted! The item owner will be notified.');
+              setBountyClaimModalVisible(false);
+            } catch (error) {
+              alert('Failed to submit claim. Please try again.');
+            }
+          }}
+          report={selectedReport}
+          user={user}
+        />
       </GestureHandlerRootView>
     </SafeAreaView>
   );
@@ -510,5 +549,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  bountyClaimButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  bountyClaimButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });

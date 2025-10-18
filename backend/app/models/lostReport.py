@@ -28,3 +28,5 @@ class LostReport(Base):
     
     item = relationship("Item", back_populates="lost_reports")
     user = relationship("User", back_populates="lost_reports") # reference to user who lost the item
+    payment_transactions = relationship("PaymentTransaction", back_populates="lost_report")
+    bounty_claims = relationship("BountyClaim", back_populates="lost_report")
