@@ -16,7 +16,7 @@ class Settings:
 
 
     SQLALCHEMY_DATABASE_URI = (
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+        "postgresql://postgres.zfrqgpyspgmuzpxijmhh:rainbowpizzacat@aws-1-us-east-2.pooler.supabase.com:6543/postgres"
     )
 
 settings = Settings()

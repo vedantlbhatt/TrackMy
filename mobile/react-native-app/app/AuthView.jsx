@@ -16,7 +16,10 @@ export default function Auth() {
     const router = useRouter();
 
     const handlepoops = async () => {
-        request = await handleLogin({email, password})
+        const request = await handleLogin({ email, password });
+        console.log('handleLogin returned:', request);
+
+        console.debug(request)
         if (request) {
           router.replace('/nav/Home'); // Navigate on success
         } else {
