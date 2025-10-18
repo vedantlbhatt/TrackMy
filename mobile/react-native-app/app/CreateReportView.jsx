@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image, Icon } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image, Icon, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import MapView, { Marker, Circle, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Location from "expo-location";
+import PaymentModal from '../components/PaymentModal';
 
 
 const { height } = Dimensions.get('window');
@@ -57,6 +58,10 @@ const CreateReportView = ({ onClose, location }) => {
 
   // image state
   const [images, setImages] = useState([]);
+
+  // payment state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [createdReportId, setCreatedReportId] = useState(null);
 
    
 
@@ -205,6 +210,7 @@ const CreateReportView = ({ onClose, location }) => {
   <MapView
     showsUserLocation={true}
     style={styles.map}
+    provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
     region={{
       latitude: location.latitude,
       longitude: location.longitude,
@@ -310,7 +316,10 @@ const CreateReportView = ({ onClose, location }) => {
           style={styles.saveButton}
           onPress={async () => {
             itemBounty == null ? setItemBounty(0) : itemBounty;
-            await handleUser('/createLostReport/', {
+            const bountyAmount = parseFloat(itemBounty) || 0;
+            
+            // Create the report first
+            const report = await handleUser('/createLostReport/', {
               user_id: Number(user.user_id),
               item_id: Number(selectedItemId),
               title: String(name),
@@ -318,24 +327,48 @@ const CreateReportView = ({ onClose, location }) => {
               longitude: parseFloat(longitude),
               latitude: parseFloat(latitude),
               radius: parseFloat(radius),
-              bounty: parseFloat(itemBounty),
+              bounty: bountyAmount,
             }, 'POST');
+            
+            setCreatedReportId(report.lost_report_id);
+            
+            // Upload images
             for (let i = 0; i < images.length; i++) {
-              console.log("uri:",
-                images[i])
+              console.log("uri:", images[i])
               await handleUser('/addImage/', {
                 item_id: selectedItemId,
                 url: images[i],
                 faiss_id: null,
               }, 'POST')
             }
-            onClose()
+            
+            // If there's a bounty, show payment modal
+            if (bountyAmount > 0) {
+              setShowPaymentModal(true);
+            } else {
+              onClose();
+            }
           }}
         >
 
           <Text style={styles.saveButtonText}>Submit Report</Text>
         </TouchableOpacity>
       </ScrollView>
+      
+      {/* Payment Modal */}
+      <PaymentModal
+        visible={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          onClose();
+        }}
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          onClose();
+        }}
+        bountyAmount={parseFloat(itemBounty) || 0}
+        reportId={createdReportId}
+      />
     </View>
   );
 };

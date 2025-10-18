@@ -13,3 +13,7 @@ class User(Base):
     items = relationship("Item", back_populates="user")
     lost_reports = relationship("LostReport", back_populates="user")
     found_reports = relationship("FoundReport", back_populates="founder")
+    paid_transactions = relationship("PaymentTransaction", foreign_keys="PaymentTransaction.payer_id", back_populates="payer")
+    received_transactions = relationship("PaymentTransaction", foreign_keys="PaymentTransaction.payee_id", back_populates="payee")
+    bounty_claims = relationship("BountyClaim", foreign_keys="BountyClaim.finder_id", back_populates="finder")
+    reviewed_claims = relationship("BountyClaim", foreign_keys="BountyClaim.reviewed_by", back_populates="reviewer")
