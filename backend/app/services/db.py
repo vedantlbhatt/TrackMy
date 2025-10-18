@@ -62,8 +62,19 @@ class item_store:
     def get_items_by_user(db, user_id):
         return db.query(Item).filter(Item.user_id == user_id).all()
     
-    def delete_item(db, item_id):
-        return None # Temporary
+    def delete_item(db, item_id, user_id):
+        item = db.query(Item).filter(Item.item_id == item_id, Item.user_id == user_id).first()
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found or you don't have permission to delete this item")
+        
+        # Also delete associated images
+        images = db.query(Image).filter(Image.item_id == item_id).all()
+        for image in images:
+            db.delete(image)
+        
+        db.delete(item)
+        db.commit()
+        return {"message": "Item deleted successfully"}
 
 class report_store:
 
