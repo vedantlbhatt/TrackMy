@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, Dimensions, Button, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
-import MapView, { Marker, Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { handleUser, handleLogin } from '../api/user_api';
 import { useRouter } from 'expo-router';

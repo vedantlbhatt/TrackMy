@@ -1,8 +1,8 @@
 import React, { useState, useRef, createContext, useContext, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList, SafeAreaView, ScrollView, Button
+  View, Text, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList, SafeAreaView, ScrollView, Button, Platform
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Circle } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT, Circle } from 'react-native-maps';
 import { Modalize } from 'react-native-modalize';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -119,7 +119,7 @@ export default function Home() {
         {location ? (
           <MapView
             style={styles.map}
-            provider={PROVIDER_GOOGLE}
+            provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
             region={{
               latitude: location.latitude,
               longitude: location.longitude,

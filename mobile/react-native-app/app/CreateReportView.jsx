@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image, Icon } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ScrollView, Modal, Image, Icon, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import MapView, { Marker, Circle, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { handleUser } from '../api/user_api';
@@ -205,6 +205,7 @@ const CreateReportView = ({ onClose, location }) => {
   <MapView
     showsUserLocation={true}
     style={styles.map}
+    provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
     region={{
       latitude: location.latitude,
       longitude: location.longitude,
