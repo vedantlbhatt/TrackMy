@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapPin, DollarSign } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 
 interface Report {
   id: number
@@ -21,42 +21,51 @@ interface MapProps {
 
 export function Map({ reports, onReportClick, selectedReport }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([])
+  const [map, setMap] = useState<any>(null)
+  const [markers, setMarkers] = useState<any[]>([])
 
   useEffect(() => {
-    const initMap = async () => {
-      const { Loader } = await import('@googlemaps/js-api-loader')
-      const loader = new Loader({
-        apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-        version: 'weekly',
-        libraries: ['places', 'geometry'],
-      })
-
-      try {
-        const google = await loader.load()
-        
-        if (mapRef.current) {
-          const mapInstance = new google.maps.Map(mapRef.current, {
-            center: { lat: 37.7749, lng: -122.4194 }, // San Francisco default
-            zoom: 13,
-            styles: [
-              {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }],
-              },
-            ],
-          })
-          
-          setMap(mapInstance)
-        }
-      } catch (error) {
-        console.error('Error loading Google Maps:', error)
-      }
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    
+    if (!apiKey || apiKey === 'your_google_maps_key_here') {
+      return
     }
 
-    initMap()
+    // Check if Google Maps is already loaded
+    if (window.google && window.google.maps) {
+      if (mapRef.current) {
+        const mapInstance = new window.google.maps.Map(mapRef.current, {
+          center: { lat: 37.7749, lng: -122.4194 },
+          zoom: 13,
+        })
+        setMap(mapInstance)
+      }
+      return
+    }
+
+    // Check if script is already being loaded
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
+    if (existingScript) {
+      return
+    }
+
+    // Simple script loading
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`
+    script.async = true
+    script.defer = true
+    
+    script.onload = () => {
+      if (mapRef.current) {
+        const mapInstance = new window.google.maps.Map(mapRef.current, {
+          center: { lat: 37.7749, lng: -122.4194 },
+          zoom: 13,
+        })
+        setMap(mapInstance)
+      }
+    }
+    
+    document.head.appendChild(script)
   }, [])
 
   useEffect(() => {
@@ -64,29 +73,13 @@ export function Map({ reports, onReportClick, selectedReport }: MapProps) {
       // Clear existing markers
       markers.forEach(marker => marker.setMap(null))
       
-      const newMarkers: google.maps.Marker[] = []
+      const newMarkers: any[] = []
       
       reports.forEach((report) => {
-        const marker = new google.maps.Marker({
+        const marker = new window.google.maps.Marker({
           position: { lat: report.latitude, lng: report.longitude },
           map: map,
           title: report.title,
-          icon: {
-            url: report.bounty > 0 
-              ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="20" cy="20" r="18" fill="#10B981" stroke="#fff" stroke-width="2"/>
-                  <text x="20" y="26" text-anchor="middle" fill="white" font-size="12" font-weight="bold">$</text>
-                </svg>
-              `)
-              : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="#fff" stroke-width="2"/>
-                  <text x="20" y="26" text-anchor="middle" fill="white" font-size="12" font-weight="bold">!</text>
-                </svg>
-              `),
-            scaledSize: new google.maps.Size(40, 40),
-          },
         })
 
         marker.addListener('click', () => {
@@ -103,6 +96,20 @@ export function Map({ reports, onReportClick, selectedReport }: MapProps) {
   return (
     <div className="relative h-full">
       <div ref={mapRef} className="w-full h-full rounded-lg" />
+      
+      {/* Map Placeholder when no API key */}
+      {(!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 
+        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === 'your_google_maps_key_here') ? (
+        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin className="w-8 h-8 text-gray-500" />
+            </div>
+            <p className="text-gray-600 font-medium">Map Placeholder</p>
+            <p className="text-sm text-gray-500">Add Google Maps API key to see interactive map</p>
+          </div>
+        </div>
+      ) : null}
       
       {/* Map Legend */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4">

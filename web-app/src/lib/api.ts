@@ -12,29 +12,29 @@ export const api = axios.create({
 // API functions that match your mobile app
 export const userApi = {
   // User endpoints
-  getProfile: () => api.get('/profile/'),
+  getProfile: () => api.get('/api/profile/'),
   login: (credentials: { email: string; password: string }) => 
-    api.post('/login/', credentials),
-  signup: (userData: any) => api.post('/signup/', userData),
+    api.post('/api/login/', credentials),
+  signup: (userData: any) => api.post('/api/signup/', userData),
   
   // Report endpoints
-  getAllLostReports: () => api.get('/getAllLostReports/'),
-  createLostReport: (reportData: any) => api.post('/createLostReport/', reportData),
-  createFoundReport: (reportData: any) => api.post('/createFoundReport/', reportData),
+  getAllLostReports: () => api.get('/api/getAllLostReports/'),
+  createLostReport: (reportData: any) => api.post('/api/createLostReport/', reportData),
+  createFoundReport: (reportData: any) => api.post('/api/createFoundReport/', reportData),
   
   // Item endpoints
-  getItemsByUser: (userId: number) => api.get(`/getItemsByUser/?user_id=${userId}`),
-  addItemByUser: (itemData: any) => api.post('/addItemByUser/', itemData),
+  getItemsByUser: (userId: number) => api.get(`/api/getItemsByUser/?user_id=${userId}`),
+  addItemByUser: (itemData: any) => api.post('/api/addItemByUser/', itemData),
   
   // Payment endpoints
-  createPaymentIntent: (paymentData: any) => api.post('/create-payment-intent', paymentData),
-  createBountyClaim: (claimData: any) => api.post('/create-bounty-claim', claimData),
+  createPaymentIntent: (paymentData: any) => api.post('/api/create-payment-intent', paymentData),
+  createBountyClaim: (claimData: any) => api.post('/api/create-bounty-claim', claimData),
   approveClaim: (claimId: number, reviewerId: number) => 
-    api.post(`/approve-claim/${claimId}`, { reviewer_id: reviewerId }),
+    api.post(`/api/approve-claim/${claimId}`, { reviewer_id: reviewerId }),
   rejectClaim: (claimId: number, reviewerId: number) => 
-    api.post(`/reject-claim/${claimId}`, { reviewer_id: reviewerId }),
-  getUserClaims: (userId: number) => api.get(`/user-claims/${userId}`),
-  getPendingClaims: (userId: number) => api.get(`/pending-claims/${userId}`),
+    api.post(`/api/reject-claim/${claimId}`, { reviewer_id: reviewerId }),
+  getUserClaims: (userId: number) => api.get(`/api/user-claims/${userId}`),
+  getPendingClaims: (userId: number) => api.get(`/api/pending-claims/${userId}`),
 };
 
 export default api;

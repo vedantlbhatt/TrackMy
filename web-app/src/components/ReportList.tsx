@@ -29,9 +29,9 @@ export function ReportList({ reports, onReportClick, onClaimBounty, selectedRepo
         </div>
       ) : (
         <div className="divide-y divide-gray-200">
-          {reports.map((report) => (
+          {reports.map((report, index) => (
             <div
-              key={report.id}
+              key={`report-${report.id}-${index}`}
               className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                 selectedReport?.id === report.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
               }`}
