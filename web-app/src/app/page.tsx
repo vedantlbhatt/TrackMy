@@ -34,6 +34,7 @@ export default function Home() {
     const fetchReports = async () => {
       if (!selectedReport) {
         try {
+          console.log('Fetching reports...');
           const response = await userApi.getAllLostReports();
           const data = response.data;
           if (data && Array.isArray(data)) {

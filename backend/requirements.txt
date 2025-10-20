@@ -2,7 +2,7 @@ torch
 faiss-cpu
 numpy
 transformers
-pillow           
+pillow
 fastapi
 uvicorn[standard]
 sqlalchemy
@@ -13,3 +13,4 @@ cryptography
 bcrypt
 python-jose[cryptography]
 alembic
+stripe
