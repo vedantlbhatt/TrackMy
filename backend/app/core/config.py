@@ -15,8 +15,15 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-    SQLALCHEMY_DATABASE_URI = (
-        "postgresql://postgres.zfrqgpyspgmuzpxijmhh:rainbowpizzacat@aws-1-us-east-2.pooler.supabase.com:6543/postgres"
-    )
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        # Use environment variables if available, otherwise use Supabase defaults
+        user = os.getenv("POSTGRES_USER") or "postgres.zfrqgpyspgmuzpxijmhh"
+        password = os.getenv("POSTGRES_PASSWORD") or "rainbowpizzacat"
+        host = os.getenv("POSTGRES_HOST") or "aws-1-us-east-2.pooler.supabase.com"
+        port = os.getenv("POSTGRES_PORT") or "6543"
+        db = os.getenv("POSTGRES_DB") or "postgres"
+
+        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 settings = Settings()
