@@ -6,6 +6,7 @@ import { ReportList } from '../components/ReportList'
 import { CreateReportModal } from '../components/CreateReportModal'
 import { BountyClaimModal } from '../components/BountyClaimModal'
 import { userApi } from '../lib/api'
+
 import { MapPin, Plus, Search } from 'lucide-react'
 
 interface Report {
@@ -23,46 +24,40 @@ export default function Home() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
+  
+  const [reportLocs, setReportLocs] = useState<Report[]>([]);
   // Mock user data to avoid 401 authentication errors
   const [user, setUser] = useState<any>({ user_id: 1, user_name: "Test User" })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchReports()
-    // Removed fetchUser() to avoid 401 authentication errors
-  }, [])
-
-  const fetchReports = async () => {
-    try {
-      const response = await userApi.getAllLostReports()
-      setReports(response.data)
-    } catch (error) {
-      console.error('Failed to fetch reports:', error)
-      // Fallback to mock data if API fails
-      setReports([
-        {
-          id: 1,
-          title: "Lost iPhone 15",
-          description: "Black iPhone 15 with blue case, lost near downtown",
-          bounty: 100,
-          latitude: 37.7749,
-          longitude: -122.4194,
-          radius: 50
-        },
-        {
-          id: 2,
-          title: "Lost Wallet",
-          description: "Brown leather wallet with driver's license",
-          bounty: 0,
-          latitude: 37.7849,
-          longitude: -122.4094,
-          radius: 30
+    const fetchReports = async () => {
+      if (!selectedReport) {
+        try {
+          const response = await userApi.getAllLostReports();
+          const data = response.data;
+          if (data && Array.isArray(data)) {
+            const reportsData = data.map((report) => ({
+              id: report.lost_report_id,
+              title: report.title || 'Untitled',
+              latitude: report.latitude ? parseFloat(report.latitude) : 0,
+              longitude: report.longitude ? parseFloat(report.longitude) : 0,
+              description: report.description || '',
+              bounty: report.bounty || 0,
+              radius: report.radius || 100,
+            }));
+            setReports(reportsData);
+            setReportLocs(reportsData);
+          }
+          setLoading(false); // Set loading to false after data is fetched
+        } catch (error) {
+          console.error('Error fetching reports:', error);
+          setLoading(false); // Set loading to false even if there's an error
         }
-      ])
-    } finally {
-      setLoading(false)
-    }
-  }
+      }
+    };
+    fetchReports();
+  }, [selectedReport]);
 
   const handleReportClick = (report: Report) => {
     setSelectedReport(report)
@@ -161,9 +156,28 @@ export default function Home() {
       <CreateReportModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setShowCreateModal(false)
-          fetchReports()
+          // Refresh reports after creating a new one
+          try {
+            const response = await userApi.getAllLostReports();
+            const data = response.data;
+            if (Array.isArray(data)) {
+              const reportsData = data.map((report) => ({
+                id: report.lost_report_id,
+                title: report.title || 'Untitled',
+                latitude: report.latitude ? parseFloat(report.latitude) : 0,
+                longitude: report.longitude ? parseFloat(report.longitude) : 0,
+                description: report.description || '',
+                bounty: report.bounty || 0,
+                radius: report.radius || 100,
+              }));
+              setReports(reportsData);
+              setReportLocs(reportsData);
+            }
+          } catch (error) {
+            console.error('Error refreshing reports:', error);
+          }
         }}
         user={user}
       />

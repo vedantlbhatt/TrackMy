@@ -4,6 +4,11 @@ from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+@app.get("/")
+def read_root():
+    return {"message": "Track My API is running", "version": "1.0"}
+
 for route in app.routes:
     print(route.path, route.methods)
 
