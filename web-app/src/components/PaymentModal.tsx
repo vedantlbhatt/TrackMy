@@ -30,7 +30,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, bountyAmount, reportI
         amount: bountyAmount,
         currency: 'usd',
         email,
-        report_id: reportId,
+        ...(reportId && { report_id: reportId }),
       })
 
       // Initialize Stripe

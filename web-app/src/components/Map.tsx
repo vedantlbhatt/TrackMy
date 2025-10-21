@@ -1,7 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { MapPin } from 'lucide-react'
+
+// Google Maps type declarations
+declare global {
+  interface Window {
+    google: {
+      maps: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Map: new (element: HTMLElement, options: { center: { lat: number; lng: number }; zoom: number }) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Marker: new (options: { position: { lat: number; lng: number }; map: any; title: string }) => any
+      }
+    }
+  }
+}
+
 
 interface Report {
   id: number
@@ -16,17 +31,18 @@ interface Report {
 interface MapProps {
   reports: Report[]
   onReportClick: (report: Report) => void
-  selectedReport: Report | null
 }
 
-export function Map({ reports, onReportClick, selectedReport }: MapProps) {
+export function Map({ reports, onReportClick }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markersRef = useRef<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [map, setMap] = useState<any>(null)
-  const [markers, setMarkers] = useState<any[]>([])
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    
+
     if (!apiKey || apiKey === 'your_google_maps_key_here') {
       return
     }
@@ -54,7 +70,7 @@ export function Map({ reports, onReportClick, selectedReport }: MapProps) {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`
     script.async = true
     script.defer = true
-    
+
     script.onload = () => {
       if (mapRef.current) {
         const mapInstance = new window.google.maps.Map(mapRef.current, {
@@ -64,17 +80,18 @@ export function Map({ reports, onReportClick, selectedReport }: MapProps) {
         setMap(mapInstance)
       }
     }
-    
+
     document.head.appendChild(script)
   }, [])
 
-  useEffect(() => {
+  const updateMarkers = useCallback(() => {
     if (map && reports.length > 0) {
       // Clear existing markers
-      markers.forEach(marker => marker.setMap(null))
-      
+      markersRef.current.forEach(marker => marker.setMap(null))
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const newMarkers: any[] = []
-      
+
       reports.forEach((report) => {
         const marker = new window.google.maps.Marker({
           position: { lat: report.latitude, lng: report.longitude },
@@ -88,10 +105,14 @@ export function Map({ reports, onReportClick, selectedReport }: MapProps) {
 
         newMarkers.push(marker)
       })
-      
-      setMarkers(newMarkers)
+
+      markersRef.current = newMarkers
     }
   }, [map, reports, onReportClick])
+
+  useEffect(() => {
+    updateMarkers()
+  }, [updateMarkers])
 
   return (
     <div className="relative h-full">

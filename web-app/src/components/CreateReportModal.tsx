@@ -1,15 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X, MapPin, DollarSign, Upload, Plus } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { X, MapPin, DollarSign, Plus } from 'lucide-react'
 import { userApi } from '../lib/api'
 import { PaymentModal } from './PaymentModal'
+
+interface User {
+  user_id: number
+  user_name: string
+}
+
+interface Item {
+  item_id: number
+  name: string
+}
 
 interface CreateReportModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
-  user: any
+  user: User | null
 }
 
 export function CreateReportModal({ isOpen, onClose, onSuccess, user }: CreateReportModalProps) {
@@ -21,27 +31,29 @@ export function CreateReportModal({ isOpen, onClose, onSuccess, user }: CreateRe
     visibility: 'Public',
   })
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<Item[]>([])
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [createdReportId, setCreatedReportId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (isOpen && user) {
-      fetchUserItems()
-      getCurrentLocation()
-    }
-  }, [isOpen, user])
+  const fetchUserItems = useCallback(async () => {
+    if (!user?.user_id) return
 
-  const fetchUserItems = async () => {
     try {
       const response = await userApi.getItemsByUser(user.user_id)
       setItems(response.data)
     } catch (error) {
       console.error('Failed to fetch items:', error)
     }
-  }
+  }, [user?.user_id])
+
+  useEffect(() => {
+    if (isOpen && user) {
+      fetchUserItems()
+      getCurrentLocation()
+    }
+  }, [isOpen, user, fetchUserItems])
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -64,11 +76,15 @@ export function CreateReportModal({ isOpen, onClose, onSuccess, user }: CreateRe
     setLoading(true)
 
     try {
+      if (!user) {
+        throw new Error('User not found')
+      }
+
       const bountyAmount = parseFloat(formData.bounty) || 0
-      
+
       const reportData = {
         user_id: user.user_id,
-        item_id: selectedItemId,
+        ...(selectedItemId && { item_id: selectedItemId }),
         title: formData.title,
         description: formData.description,
         longitude: location?.lng || 0,
