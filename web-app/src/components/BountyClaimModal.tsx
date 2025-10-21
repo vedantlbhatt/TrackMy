@@ -4,6 +4,11 @@ import { useState } from 'react'
 import { X, DollarSign, MessageSquare, User } from 'lucide-react'
 import { userApi } from '../lib/api'
 
+interface User {
+  user_id: number
+  user_name: string
+}
+
 interface Report {
   id: number
   title: string
@@ -16,7 +21,7 @@ interface BountyClaimModalProps {
   onClose: () => void
   onSuccess: () => void
   report: Report | null
-  user: any
+  user: User | null
 }
 
 export function BountyClaimModal({ isOpen, onClose, onSuccess, report, user }: BountyClaimModalProps) {
@@ -39,9 +44,13 @@ export function BountyClaimModal({ isOpen, onClose, onSuccess, report, user }: B
 
     setLoading(true)
     try {
+      if (!report?.id || !user?.user_id) {
+        throw new Error('Missing required data for bounty claim')
+      }
+
       await userApi.createBountyClaim({
-        report_id: report?.id,
-        finder_id: user?.user_id,
+        report_id: report.id,
+        finder_id: user.user_id,
         claim_message: claimMessage,
         contact_info: contactInfo,
       })
@@ -129,8 +138,8 @@ export function BountyClaimModal({ isOpen, onClose, onSuccess, report, user }: B
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-blue-700">
-                    The item owner will be notified and can verify your claim. 
-                    If approved, you'll receive the bounty payment.
+                    The item owner will be notified and can verify your claim.
+                    If approved, you&apos;ll receive the bounty payment.
                   </p>
                 </div>
               </div>

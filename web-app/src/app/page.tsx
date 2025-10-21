@@ -7,7 +7,12 @@ import { CreateReportModal } from '../components/CreateReportModal'
 import { BountyClaimModal } from '../components/BountyClaimModal'
 import { userApi } from '../lib/api'
 
-import { MapPin, Plus, Search } from 'lucide-react'
+import { MapPin, Plus } from 'lucide-react'
+
+interface User {
+  user_id: number
+  user_name: string
+}
 
 interface Report {
   id: number
@@ -24,10 +29,9 @@ export default function Home() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
-  
-  const [reportLocs, setReportLocs] = useState<Report[]>([]);
+
   // Mock user data to avoid 401 authentication errors
-  const [user, setUser] = useState<any>({ user_id: 1, user_name: "Test User" })
+  const [user] = useState<User>({ user_id: 1, user_name: "Test User" })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -48,7 +52,6 @@ export default function Home() {
               radius: report.radius || 100,
             }));
             setReports(reportsData);
-            setReportLocs(reportsData);
           }
           setLoading(false); // Set loading to false after data is fetched
         } catch (error) {
@@ -109,7 +112,6 @@ export default function Home() {
               <Map
                 reports={reports}
                 onReportClick={handleReportClick}
-                selectedReport={selectedReport}
               />
             </div>
           </div>
@@ -174,7 +176,6 @@ export default function Home() {
                 radius: report.radius || 100,
               }));
               setReports(reportsData);
-              setReportLocs(reportsData);
             }
           } catch (error) {
             console.error('Error refreshing reports:', error);
