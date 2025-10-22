@@ -38,7 +38,6 @@ export default function Home() {
     const fetchReports = async () => {
       if (!selectedReport) {
         try {
-          console.log('Fetching reports...');
           const response = await userApi.getAllLostReports();
           const data = response.data;
           if (data && Array.isArray(data)) {
@@ -52,11 +51,13 @@ export default function Home() {
               radius: report.radius || 100,
             }));
             setReports(reportsData);
+          } else {
+            setReports([]);
           }
-          setLoading(false); // Set loading to false after data is fetched
+          setLoading(false);
         } catch (error) {
           console.error('Error fetching reports:', error);
-          setLoading(false); // Set loading to false even if there's an error
+          setLoading(false);
         }
       }
     };
