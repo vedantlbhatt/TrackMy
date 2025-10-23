@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-df0a.up.railway.app';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +9,35 @@ export const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor to include Supabase auth token
+api.interceptors.request.use(async (config) => {
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  }
+  return config;
+});
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, sign out user
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Type definitions
 export interface User {
@@ -62,48 +92,17 @@ export interface BountyClaim {
 
 // API functions that match your mobile app
 export const userApi = {
-  // User endpoints
+  // User endpoints - Note: Authentication is now handled by Supabase
   getProfile: () => api.get('/api/profile/'),
-  login: (credentials: { email: string; password: string }) =>
-    api.post('/api/login/', credentials),
-  signup: (userData: Omit<User, 'user_id'>) => api.post('/api/signup/', userData),
-  updateProfile: (userId: number, userData: Partial<User>) => 
-    api.put(`/api/users/${userId}`, userData),
-  deleteUser: (userId: number) => api.delete(`/api/users/${userId}`),
 
   // Report endpoints
   getAllLostReports: () => api.get('/api/getAllLostReports/'),
-  getLostReportById: (reportId: number) => api.get(`/api/getLostReport/${reportId}`),
-  getLostReportsByUser: (userId: number) => api.get(`/api/getLostReportByUser/${userId}`),
   createLostReport: (reportData: LostReport) => api.post('/api/createLostReport/', reportData),
-  updateLostReport: (reportId: number, reportData: Partial<LostReport>) => 
-    api.put(`/api/editLostReport/${reportId}`, reportData),
-  deleteLostReport: (reportId: number) => api.delete(`/api/deleteLostReport/${reportId}`),
-
-  // Found Report endpoints
-  getAllFoundReports: () => api.get('/api/getAllFoundReports/'),
-  getFoundReportById: (reportId: number) => api.get(`/api/getFoundReport/${reportId}`),
-  getFoundReportsByUser: (userId: number) => api.get(`/api/getFoundReportByUser/${userId}`),
   createFoundReport: (reportData: FoundReport) => api.post('/api/createFoundReport/', reportData),
-  updateFoundReport: (reportId: number, reportData: Partial<FoundReport>) => 
-    api.put(`/api/editFoundReport/${reportId}`, reportData),
-  deleteFoundReport: (reportId: number) => api.delete(`/api/deleteFoundReport/${reportId}`),
 
   // Item endpoints
   getItemsByUser: (userId: number) => api.get(`/api/getItemsByUser/?user_id=${userId}`),
-  getItemById: (itemId: number) => api.get(`/api/getItem/${itemId}`),
   addItemByUser: (itemData: Omit<Item, 'item_id'>) => api.post('/api/addItemByUser/', itemData),
-  updateItem: (itemId: number, itemData: Partial<Item>) => 
-    api.put(`/api/updateItem/${itemId}`, itemData),
-  deleteItem: (itemId: number) => api.delete(`/api/deleteItem/${itemId}`),
-
-  // Search endpoints
-  searchReports: (query: string, filters?: {
-    category?: string;
-    status?: string;
-    bounty?: string;
-    dateRange?: string;
-  }) => api.get('/api/search', { params: { q: query, ...filters } }),
 
   // Payment endpoints
   createPaymentIntent: (paymentData: PaymentData) => api.post('/api/create-payment-intent', paymentData),
@@ -114,22 +113,6 @@ export const userApi = {
     api.post(`/api/reject-claim/${claimId}`, { reviewer_id: reviewerId }),
   getUserClaims: (userId: number) => api.get(`/api/user-claims/${userId}`),
   getPendingClaims: (userId: number) => api.get(`/api/pending-claims/${userId}`),
-
-  // Image endpoints
-  uploadImage: (file: File, reportId?: number) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (reportId) formData.append('report_id', reportId.toString());
-    return api.post('/api/upload-image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  deleteImage: (imageId: number) => api.delete(`/api/delete-image/${imageId}`),
-
-  // Analytics endpoints
-  getUserStats: (userId: number) => api.get(`/api/user-stats/${userId}`),
-  getReportStats: (reportId: number) => api.get(`/api/report-stats/${reportId}`),
-  getGlobalStats: () => api.get('/api/global-stats'),
 };
 
 export default api;

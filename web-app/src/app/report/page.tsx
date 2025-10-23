@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
+import { MapPin, Camera, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
+import { Map } from '../../components/Map'
 
 export default function ReportPage() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost')
@@ -33,7 +34,7 @@ export default function ReportPage() {
     { number: 5, title: 'Review', description: 'Confirm details' }
   ]
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -121,7 +122,7 @@ export default function ReportPage() {
                       <AlertCircle className="h-8 w-8 text-red-600" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">I Lost Something</h3>
-                    <p className="text-gray-600">Report an item you&apos;ve lost and want to find</p>
+                    <p className="text-gray-600">Report an item you've lost and want to find</p>
                   </div>
                 </button>
 
@@ -246,8 +247,11 @@ export default function ReportPage() {
                     <MapPin className="h-5 w-5 text-blue-600 mr-2" />
                     <h3 className="font-semibold text-blue-900">Map Location</h3>
                   </div>
-                  <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-600">Map will be integrated here</p>
+                  <div className="h-64 rounded-lg overflow-hidden">
+                    <Map 
+                      reports={[]} 
+                      onReportClick={() => {}} 
+                    />
                   </div>
                 </div>
 

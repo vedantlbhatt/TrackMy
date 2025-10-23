@@ -84,7 +84,7 @@ export function CreateReportModal({ isOpen, onClose, onSuccess, user }: CreateRe
 
       const reportData = {
         user_id: user.user_id,
-        ...(selectedItemId && { item_id: selectedItemId }),
+        item_id: selectedItemId || 1, // Use selected item or default to 1
         title: formData.title,
         description: formData.description,
         longitude: location?.lng || 0,

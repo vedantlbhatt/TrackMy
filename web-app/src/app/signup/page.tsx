@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Check } from 'lucide-react'
-import { userApi } from '@/lib/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -19,6 +19,16 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+  const { signUp } = useAuth()
+
+  // Debug environment variables
+  useEffect(() => {
+    console.log('Environment variables check:');
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING');
+    console.log('URL is undefined:', typeof process.env.NEXT_PUBLIC_SUPABASE_URL === 'undefined');
+    console.log('Key is undefined:', typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === 'undefined');
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -46,14 +56,25 @@ export default function SignupPage() {
     setError('')
 
     try {
-      const { confirmPassword: _, ...userData } = formData
-      await userApi.signup(userData)
-      setSuccess(true)
+      const { data, error } = await signUp(formData.email, formData.password, {
+        user_name: formData.user_name
+      })
       
-      // Auto redirect after 2 seconds
-      setTimeout(() => {
-        router.push('/login')
-      }, 2000)
+      if (error) {
+        setError(error.message)
+      } else {
+        // Check if email confirmation is required
+        if (data.user && !data.user.email_confirmed_at) {
+          setSuccess(true)
+          setError('Please check your email and click the confirmation link to complete signup.')
+        } else {
+          setSuccess(true)
+          // Auto redirect after 2 seconds
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        }
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.'
       setError(errorMessage)
@@ -64,217 +85,388 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="h-8 w-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h2>
-            <p className="text-gray-600 mb-6">
-              Your TrackMy account has been created successfully. You can now sign in.
-            </p>
-            <Link href="/login" className="btn-primary">
-              Go to Sign In
-            </Link>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem'
+      }}>
+        <div style={{
+          maxWidth: '28rem',
+          width: '100%',
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          padding: '2rem',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '4rem',
+            height: '4rem',
+            backgroundColor: '#dcfce7',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1rem'
+          }}>
+            <Check style={{ width: '2rem', height: '2rem', color: '#16a34a' }} />
           </div>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#111827',
+            marginBottom: '0.5rem'
+          }}>Account Created!</h2>
+          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+            Your TrackMy account has been created successfully. Please check your email to verify your account.
+          </p>
+          <Link href="/login" style={{
+            display: 'inline-block',
+            backgroundColor: '#2563eb',
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '0.5rem',
+            textDecoration: 'none',
+            fontWeight: '500'
+          }}>
+            Go to Sign In
+          </Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '3rem 1rem'
+    }}>
+      <div style={{
+        maxWidth: '28rem',
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: '1rem',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        padding: '2rem'
+      }}>
         {/* Header */}
-        <div className="text-center">
-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-500 mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Link href="/" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            color: '#2563eb',
+            textDecoration: 'none',
+            marginBottom: '1.5rem'
+          }}>
+            <ArrowLeft style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
             Back to Home
           </Link>
           
-          <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 rounded-2xl">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+              padding: '0.75rem',
+              borderRadius: '1rem'
+            }}>
+              <svg style={{ width: '2rem', height: '2rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-          <p className="text-gray-600">Join TrackMy and start finding your lost items</p>
+          <h2 style={{
+            fontSize: '1.875rem',
+            fontWeight: 'bold',
+            color: '#111827',
+            marginBottom: '0.5rem'
+          }}>Create Account</h2>
+          <p style={{ color: '#6b7280' }}>Join TrackMy and start finding your lost items</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name */}
-            <div>
-              <label htmlFor="user_name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="user_name"
-                  type="text"
-                  required
-                  value={formData.user_name}
-                  onChange={(e) => handleInputChange('user_name', e.target.value)}
-                  className="input-field pl-10"
-                  placeholder="Enter your full name"
-                />
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Full Name */}
+          <div>
+            <label htmlFor="user_name" style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#374151',
+              marginBottom: '0.5rem'
+            }}>
+              Full Name
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.75rem',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none'
+              }}>
+                <User style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
               </div>
+              <input
+                id="user_name"
+                type="text"
+                required
+                value={formData.user_name}
+                onChange={(e) => handleInputChange('user_name', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 0.75rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="Enter your full name"
+              />
             </div>
+          </div>
 
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="input-field pl-10"
-                  placeholder="Enter your email"
-                />
+          {/* Email */}
+          <div>
+            <label htmlFor="email" style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#374151',
+              marginBottom: '0.5rem'
+            }}>
+              Email Address
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.75rem',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none'
+              }}>
+                <Mail style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
               </div>
+              <input
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 0.75rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="Enter your email"
+              />
             </div>
+          </div>
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="input-field pl-10 pr-10"
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
+          {/* Password */}
+          <div>
+            <label htmlFor="password" style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#374151',
+              marginBottom: '0.5rem'
+            }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.75rem',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none'
+              }}>
+                <Lock style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
               </div>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 2.5rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="Create a password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: '0.75rem',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.25rem'
+                }}
+              >
+                {showPassword ? (
+                  <EyeOff style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
+                ) : (
+                  <Eye style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
+                )}
+              </button>
             </div>
+          </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className="input-field pl-10 pr-10"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
+          {/* Confirm Password */}
+          <div>
+            <label htmlFor="confirmPassword" style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#374151',
+              marginBottom: '0.5rem'
+            }}>
+              Confirm Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.75rem',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none'
+              }}>
+                <Lock style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
               </div>
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 2.5rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="Confirm your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: '0.75rem',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.25rem'
+                }}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
+                ) : (
+                  <Eye style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
+                )}
+              </button>
             </div>
+          </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '0.5rem',
+              padding: '0.75rem'
+            }}>
+              <p style={{ fontSize: '0.875rem', color: '#dc2626' }}>{error}</p>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              backgroundColor: isLoading ? '#9ca3af' : '#2563eb',
+              color: 'white',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.75rem',
+              border: 'none',
+              fontSize: '1rem',
+              fontWeight: '500',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isLoading ? (
+              <>
+                <div style={{
+                  width: '1rem',
+                  height: '1rem',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTop: '2px solid white',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                Creating Account...
+              </>
+            ) : (
+              'Create Account'
             )}
+          </button>
 
-            {/* Terms and Conditions */}
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-blue-600 hover:text-blue-500">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <div className="spinner mr-2"></div>
-                  Creating Account...
-                </>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-
-            {/* Sign In Link */}
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign in here
-                </Link>
-              </p>
-            </div>
-          </form>
-        </div>
+          {/* Sign In Link */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Already have an account?{' '}
+              <Link href="/login" style={{
+                fontWeight: '500',
+                color: '#2563eb',
+                textDecoration: 'none'
+              }}>
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   )
 }
+
