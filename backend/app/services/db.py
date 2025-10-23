@@ -160,7 +160,7 @@ class report_store:
         return {"message": "Report deleted successfully"}
     
     def get_found_reports_by_user(db, user_id):
-        return db.query(FoundReport).filter(FoundReport.user_id == user_id).all()
+        return db.query(FoundReport).filter(FoundReport.founder_id == user_id).all()
     
 class image_store:
 

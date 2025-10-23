@@ -1,24 +1,94 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { User, Settings, Bell, Shield, MapPin, Clock, DollarSign, Edit, Camera, LogOut } from 'lucide-react'
+import { userApi } from '../../lib/api'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function ProfilePage() {
+  const { user: authUser, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
   const [isEditing, setIsEditing] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [userReports, setUserReports] = useState<any[]>([])
+  const [userFoundReports, setUserFoundReports] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    avatar: null,
-    joinDate: '2024-01-15',
-    stats: {
-      reportsSubmitted: 12,
-      itemsFound: 8,
-      rewardsEarned: 450,
-      successRate: 95
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        // For now, use mock user data since we need to implement proper user mapping
+        // TODO: Implement proper user mapping from Supabase to backend
+        const mockUser = {
+          user_id: 1,
+          user_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          created_at: authUser.created_at
+        }
+        setUser(mockUser)
+
+        // Get user's lost reports
+        const lostReportsResponse = await userApi.getLostReportsByUser(1) // Using user_id 1 for now
+        setUserReports(lostReportsResponse.data || [])
+
+        // Get user's found reports  
+        const foundReportsResponse = await userApi.getFoundReportsByUser(1) // Using user_id 1 for now
+        setUserFoundReports(foundReportsResponse.data || [])
+
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        // Set fallback data
+        setUser({
+          user_id: 1,
+          user_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          created_at: authUser.created_at
+        })
+        setUserReports([])
+        setUserFoundReports([])
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchUserData()
+  }, [authUser])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!authUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Sign In</h1>
+          <p className="text-gray-600 mb-6">You need to be signed in to view your profile</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="btn-primary"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const userStats = {
+    reportsSubmitted: userReports.length,
+    itemsFound: userFoundReports.length,
+    rewardsEarned: userReports.reduce((sum, report) => sum + (report.bounty || 0), 0),
+    successRate: userFoundReports.length > 0 ? Math.round((userFoundReports.length / userReports.length) * 100) : 0
   }
 
   const recentActivity = [
@@ -65,8 +135,8 @@ export default function ProfilePage() {
               {/* Avatar */}
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-24 h-24 rounded-full object-cover" />
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.user_name || 'User'} className="w-24 h-24 rounded-full object-cover" />
                   ) : (
                     <User className="h-12 w-12 text-white" />
                   )}
@@ -78,9 +148,9 @@ export default function ProfilePage() {
 
               {/* User Info */}
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
-                <p className="text-gray-600 mb-2">{user.email}</p>
-                <p className="text-gray-500 text-sm">Member since {new Date(user.joinDate).toLocaleDateString()}</p>
+                <h1 className="text-3xl font-bold text-gray-900">{user?.user_name || 'User'}</h1>
+                <p className="text-gray-600 mb-2">{user?.email || 'No email'}</p>
+                <p className="text-gray-500 text-sm">Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Recently'}</p>
               </div>
             </div>
 
@@ -92,7 +162,10 @@ export default function ProfilePage() {
                 <Edit className="h-4 w-4" />
                 <span>Edit Profile</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300">
+              <button 
+                onClick={signOut}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Sign Out</span>
               </button>
@@ -137,7 +210,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-600 text-sm">Reports Submitted</p>
-                        <p className="text-3xl font-bold text-gray-900">{user.stats.reportsSubmitted}</p>
+                        <p className="text-3xl font-bold text-gray-900">{userStats.reportsSubmitted}</p>
                       </div>
                       <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                         <MapPin className="h-6 w-6 text-blue-600" />
@@ -149,7 +222,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-600 text-sm">Items Found</p>
-                        <p className="text-3xl font-bold text-gray-900">{user.stats.itemsFound}</p>
+                        <p className="text-3xl font-bold text-gray-900">{userStats.itemsFound}</p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                         <Shield className="h-6 w-6 text-green-600" />
@@ -161,7 +234,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-600 text-sm">Rewards Earned</p>
-                        <p className="text-3xl font-bold text-gray-900">${user.stats.rewardsEarned}</p>
+                        <p className="text-3xl font-bold text-gray-900">${userStats.rewardsEarned}</p>
                       </div>
                       <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
                         <DollarSign className="h-6 w-6 text-yellow-600" />
@@ -173,7 +246,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-600 text-sm">Success Rate</p>
-                        <p className="text-3xl font-bold text-gray-900">{user.stats.successRate}%</p>
+                        <p className="text-3xl font-bold text-gray-900">{userStats.successRate}%</p>
                       </div>
                       <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                         <Bell className="h-6 w-6 text-purple-600" />
@@ -216,12 +289,41 @@ export default function ProfilePage() {
             {activeTab === 'reports' && (
               <div className="bg-white rounded-2xl shadow-xl p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">My Reports</h3>
-                <div className="text-center py-12">
-                  <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No reports yet</h4>
-                  <p className="text-gray-600 mb-6">Start by reporting a lost or found item</p>
-                  <button className="btn-primary">Create Report</button>
-                </div>
+                {userReports.length === 0 ? (
+                  <div className="text-center py-12">
+                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No reports yet</h4>
+                    <p className="text-gray-600 mb-6">Start by reporting a lost or found item</p>
+                    <button 
+                      onClick={() => window.location.href = '/report'}
+                      className="btn-primary"
+                    >
+                      Create Report
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {userReports.map((report) => (
+                      <div key={report.lost_report_id} className="border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{report.title}</h4>
+                            <p className="text-sm text-gray-600">{report.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Created: {new Date(report.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            {report.bounty > 0 && (
+                              <p className="text-green-600 font-semibold">${report.bounty} bounty</p>
+                            )}
+                            <span className="text-sm text-gray-500">Lost Item</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

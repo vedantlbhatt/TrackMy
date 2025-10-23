@@ -99,3 +99,4 @@ CREATE POLICY "Users can insert own profile" ON profiles
 - 🔒 Rate limiting and abuse protection
 - 🔒 GDPR compliant data handling
 
+
