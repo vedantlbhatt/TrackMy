@@ -3,3 +3,4 @@ iOS app for empowering users to manage, track, and find items
 
 
 
+# Vercel Deployment Ready
