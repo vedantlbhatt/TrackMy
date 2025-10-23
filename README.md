@@ -7,3 +7,4 @@ Track current lost reports within your vicinity/collegee
 
 
 
+# Vercel Deployment Ready
