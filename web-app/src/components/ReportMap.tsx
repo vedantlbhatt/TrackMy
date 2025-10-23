@@ -3,21 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { MapPin } from 'lucide-react'
 
-// Google Maps type declarations
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Map: new (element: HTMLElement, options: { center: { lat: number; lng: number }; zoom: number }) => any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Marker: new (options: { position: { lat: number; lng: number }; map: any; title: string }) => any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Circle: new (options: { center: { lat: number; lng: number }; radius: number; map: any; fillColor: string; fillOpacity: number; strokeColor: string; strokeOpacity: number }) => any
-      }
-    }
-  }
-}
 
 interface ReportMapProps {
   latitude: number
@@ -27,7 +12,7 @@ interface ReportMapProps {
   onRadiusChange: (radius: number) => void
 }
 
-export function ReportMap({ latitude, longitude, radius, onLocationChange, onRadiusChange }: ReportMapProps) {
+export function ReportMap({ latitude, longitude, radius, onLocationChange }: ReportMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [map, setMap] = useState<any>(null)
@@ -158,7 +143,7 @@ export function ReportMap({ latitude, longitude, radius, onLocationChange, onRad
         }
       })
     }
-  }, [map, isMapReady, latitude, longitude, radius, onLocationChange])
+  }, [map, isMapReady, latitude, longitude, radius, onLocationChange, circle, marker, pulseCircles])
 
   // Update circle when radius changes
   useEffect(() => {

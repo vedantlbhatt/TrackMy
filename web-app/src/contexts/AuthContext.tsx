@@ -8,9 +8,9 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signUp: (email: string, password: string, userData?: {user_name?: string}) => Promise<{ data: any; error: any }>
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>
-  signOut: () => Promise<{ error: any }>
+  signUp: (email: string, password: string, userData?: {user_name?: string}) => Promise<{ data: {user: User | null, session: Session | null} | null; error: {message: string} | null }>
+  signIn: (email: string, password: string) => Promise<{ data: {user: User | null, session: Session | null} | null; error: {message: string} | null }>
+  signOut: () => Promise<{ error: {message: string} | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string, userData?: any) => {
+  const signUp = async (email: string, password: string, userData?: {user_name?: string}) => {
     const result = await auth.signUp(email, password, userData)
     return result
   }
