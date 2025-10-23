@@ -100,3 +100,4 @@ CREATE POLICY "Users can insert own profile" ON profiles
 - 🔒 GDPR compliant data handling
 
 
+

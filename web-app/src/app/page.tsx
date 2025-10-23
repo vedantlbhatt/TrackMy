@@ -55,8 +55,14 @@ export default function Home() {
           setReports([]);
         }
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
+      } catch (error: unknown) {
+        console.error('❌ Error fetching reports:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          code: (error as { code?: string }).code,
+          response: (error as { response?: { data?: unknown; status?: number } }).response?.data,
+          status: (error as { response?: { status?: number } }).response?.status,
+          config: (error as { config?: { url?: string } }).config?.url
+        });
         setLoading(false);
       }
     };

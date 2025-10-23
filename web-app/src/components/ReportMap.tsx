@@ -143,7 +143,7 @@ export function ReportMap({ latitude, longitude, radius, onLocationChange }: Rep
         }
       })
     }
-  }, [map, isMapReady, latitude, longitude, radius, onLocationChange, circle, marker, pulseCircles])
+  }, [map, isMapReady, latitude, longitude, radius, onLocationChange])
 
   // Update circle when radius changes
   useEffect(() => {
@@ -193,9 +193,13 @@ export function ReportMap({ latitude, longitude, radius, onLocationChange }: Rep
               <span className="text-gray-600">Latitude:</span>
               <span className="font-mono text-gray-900">{latitude.toFixed(6)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-1">
               <span className="text-gray-600">Longitude:</span>
               <span className="font-mono text-gray-900">{longitude.toFixed(6)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Radius:</span>
+              <span className="font-mono text-gray-900">{radius}m</span>
             </div>
           </div>
         </div>

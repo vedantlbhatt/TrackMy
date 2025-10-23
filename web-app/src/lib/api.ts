@@ -1,13 +1,25 @@
 import axios from 'axios';
 import { supabase } from './supabase';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Use Railway backend URL for production, localhost for development
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://backend-production-df0a.up.railway.app' 
+    : 'http://localhost:8000');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
+});
+
+// Debug logging for API configuration
+console.log('🔧 API Configuration:', {
+  baseURL: API_BASE_URL,
+  nodeEnv: process.env.NODE_ENV,
+  hasApiUrl: !!process.env.NEXT_PUBLIC_API_URL
 });
 
 // Add request interceptor to include Supabase auth token
@@ -15,11 +27,7 @@ api.interceptors.request.use(async (config) => {
   try {
     // Only run in browser environment and if supabase is available
     if (typeof window !== 'undefined' && supabase) {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.warn('Session error:', error.message);
-        return config; // Continue without auth token
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) {
         config.headers.Authorization = `Bearer ${session.access_token}`;
       }
