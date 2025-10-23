@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Camera, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
+import { MapPin, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
 
 export default function ReportPage() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost')
@@ -33,7 +33,7 @@ export default function ReportPage() {
     { number: 5, title: 'Review', description: 'Confirm details' }
   ]
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -121,7 +121,7 @@ export default function ReportPage() {
                       <AlertCircle className="h-8 w-8 text-red-600" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">I Lost Something</h3>
-                    <p className="text-gray-600">Report an item you've lost and want to find</p>
+                    <p className="text-gray-600">Report an item you&apos;ve lost and want to find</p>
                   </div>
                 </button>
 

@@ -10,9 +10,7 @@ import {
   User, 
   Menu, 
   X,
-  Home,
-  Bell,
-  Settings
+  Home
 } from 'lucide-react'
 
 export default function Navigation() {
@@ -91,15 +89,12 @@ export default function Navigation() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300">
-                <Bell className="h-5 w-5" />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300">
-                <Settings className="h-5 w-5" />
-              </button>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
+              <Link href="/login" className="btn-secondary">
+                Sign In
+              </Link>
+              <Link href="/signup" className="btn-primary">
+                Get Started
+              </Link>
             </div>
           </div>
         </div>

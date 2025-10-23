@@ -1,8 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, MapPin, Clock, DollarSign, Grid, List } from 'lucide-react'
+import { Search, MapPin, Grid, List } from 'lucide-react'
 import ReportCard from '@/components/ReportCard'
+
+interface Report {
+  id: number
+  title: string
+  description: string
+  bounty: number
+  latitude: number
+  longitude: number
+  radius: number
+  status: 'lost' | 'found' | 'pending'
+  createdAt: string
+  imageUrl?: string
+}
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -13,7 +26,7 @@ export default function SearchPage() {
     dateRange: 'all'
   })
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [reports, setReports] = useState([])
+  const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
 
   const categories = [
@@ -43,7 +56,7 @@ export default function SearchPage() {
 
   // Mock data - replace with actual API call
   useEffect(() => {
-    const mockReports = [
+    const mockReports: Report[] = [
       {
         id: 1,
         title: 'iPhone 13 Pro',
@@ -52,9 +65,9 @@ export default function SearchPage() {
         latitude: 40.7128,
         longitude: -74.0060,
         radius: 100,
-        status: 'lost',
+        status: 'lost' as const,
         createdAt: '2024-01-15T10:30:00Z',
-        imageUrl: null
+        imageUrl: undefined
       },
       {
         id: 2,
@@ -64,9 +77,9 @@ export default function SearchPage() {
         latitude: 40.7589,
         longitude: -73.9851,
         radius: 50,
-        status: 'found',
+        status: 'found' as const,
         createdAt: '2024-01-14T15:45:00Z',
-        imageUrl: null
+        imageUrl: undefined
       },
       {
         id: 3,
@@ -76,9 +89,9 @@ export default function SearchPage() {
         latitude: 40.7505,
         longitude: -73.9934,
         radius: 150,
-        status: 'lost',
+        status: 'lost' as const,
         createdAt: '2024-01-13T09:20:00Z',
-        imageUrl: null
+        imageUrl: undefined
       }
     ]
     
@@ -88,11 +101,11 @@ export default function SearchPage() {
     }, 1000)
   }, [])
 
-  const handleViewDetails = (report: any) => {
+  const handleViewDetails = (report: Report) => {
     console.log('View details for:', report)
   }
 
-  const handleClaimBounty = (report: any) => {
+  const handleClaimBounty = (report: Report) => {
     console.log('Claim bounty for:', report)
   }
 

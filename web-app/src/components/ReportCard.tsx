@@ -12,12 +12,12 @@ interface ReportCardProps {
     latitude: number
     longitude: number
     radius: number
-    createdAt?: string
-    status?: 'lost' | 'found' | 'pending'
+    createdAt: string
+    status: 'lost' | 'found' | 'pending'
     imageUrl?: string
   }
-  onViewDetails?: (report: any) => void
-  onClaimBounty?: (report: any) => void
+  onViewDetails?: (report: ReportCardProps['report']) => void
+  onClaimBounty?: (report: ReportCardProps['report']) => void
 }
 
 export default function ReportCard({ report, onViewDetails, onClaimBounty }: ReportCardProps) {
