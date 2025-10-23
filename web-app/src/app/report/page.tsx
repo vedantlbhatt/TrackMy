@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MapPin, Camera, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
+import { Map } from '../../components/Map'
 
 export default function ReportPage() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost')
@@ -246,8 +247,11 @@ export default function ReportPage() {
                     <MapPin className="h-5 w-5 text-blue-600 mr-2" />
                     <h3 className="font-semibold text-blue-900">Map Location</h3>
                   </div>
-                  <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-600">Map will be integrated here</p>
+                  <div className="h-64 rounded-lg overflow-hidden">
+                    <Map 
+                      reports={[]} 
+                      onReportClick={() => {}} 
+                    />
                   </div>
                 </div>
 

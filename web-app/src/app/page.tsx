@@ -5,7 +5,6 @@ import { Map } from '../components/Map'
 import { ReportList } from '../components/ReportList'
 import { CreateReportModal } from '../components/CreateReportModal'
 import { BountyClaimModal } from '../components/BountyClaimModal'
-import Navigation from '../components/Navigation'
 import HeroSection from '../components/HeroSection'
 import ReportCard from '../components/ReportCard'
 import { userApi } from '../lib/api'
@@ -39,33 +38,31 @@ export default function Home() {
 
   useEffect(() => {
     const fetchReports = async () => {
-      if (!selectedReport) {
-        try {
-          const response = await userApi.getAllLostReports();
-          const data = response.data;
-          if (data && Array.isArray(data)) {
-            const reportsData = data.map((report) => ({
-              id: report.lost_report_id,
-              title: report.title || 'Untitled',
-              latitude: report.latitude ? parseFloat(report.latitude) : 0,
-              longitude: report.longitude ? parseFloat(report.longitude) : 0,
-              description: report.description || '',
-              bounty: report.bounty || 0,
-              radius: report.radius || 100,
-            }));
-            setReports(reportsData);
-          } else {
-            setReports([]);
-          }
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching reports:', error);
-          setLoading(false);
+      try {
+        const response = await userApi.getAllLostReports();
+        const data = response.data;
+        if (data && Array.isArray(data)) {
+          const reportsData = data.map((report) => ({
+            id: report.lost_report_id,
+            title: report.title || 'Untitled',
+            latitude: report.latitude ? parseFloat(report.latitude) : 0,
+            longitude: report.longitude ? parseFloat(report.longitude) : 0,
+            description: report.description || '',
+            bounty: report.bounty || 0,
+            radius: report.radius || 100,
+          }));
+          setReports(reportsData);
+        } else {
+          setReports([]);
         }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+        setLoading(false);
       }
     };
     fetchReports();
-  }, [selectedReport]);
+  }, []);
 
   const handleReportClick = (report: Report) => {
     setSelectedReport(report)
@@ -86,9 +83,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <Navigation />
-
       {/* Hero Section */}
       <HeroSection />
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   MapPin, 
   Search, 
@@ -11,13 +11,15 @@ import {
   Menu, 
   X,
   Home,
-  Bell,
-  Settings
+  LogOut
 } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, signOut } = useAuth()
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
@@ -26,6 +28,11 @@ export default function Navigation() {
     { name: 'My Items', href: '/my-items', icon: MapPin },
     { name: 'Profile', href: '/profile', icon: User },
   ]
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+  }
 
   return (
     <>
@@ -91,15 +98,31 @@ export default function Navigation() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300">
-                <Bell className="h-5 w-5" />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300">
-                <Settings className="h-5 w-5" />
-              </button>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
+              {user ? (
+                <>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-sm text-gray-700">
+                      Welcome, {user.user_metadata?.user_name || user.email}
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="btn-secondary">
+                    Sign In
+                  </Link>
+                  <Link href="/signup" className="btn-primary">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -152,6 +175,44 @@ export default function Navigation() {
                   )
                 })}
               </nav>
+
+              {/* User section */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                {user ? (
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      Welcome, {user.user_metadata?.user_name || user.email}
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleSignOut()
+                        setIsOpen(false)
+                      }}
+                      className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 w-full"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Link
+                      href="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="block w-full text-center px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-xl transition-all duration-300"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => setIsOpen(false)}
+                      className="block w-full text-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300"
+                    >
+                      Get Started
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

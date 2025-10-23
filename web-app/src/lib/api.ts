@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-df0a.up.railway.app';
 
@@ -8,6 +9,35 @@ export const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor to include Supabase auth token
+api.interceptors.request.use(async (config) => {
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  }
+  return config;
+});
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, sign out user
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Type definitions
 export interface User {
@@ -62,11 +92,8 @@ export interface BountyClaim {
 
 // API functions that match your mobile app
 export const userApi = {
-  // User endpoints
+  // User endpoints - Note: Authentication is now handled by Supabase
   getProfile: () => api.get('/api/profile/'),
-  login: (credentials: { email: string; password: string }) =>
-    api.post('/api/login/', credentials),
-  signup: (userData: Omit<User, 'user_id'>) => api.post('/api/signup/', userData),
 
   // Report endpoints
   getAllLostReports: () => api.get('/api/getAllLostReports/'),

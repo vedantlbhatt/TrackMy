@@ -81,6 +81,10 @@ export function Map({ reports, onReportClick }: MapProps) {
       }
     }
 
+    script.onerror = () => {
+      console.error('Failed to load Google Maps API. Please check your API key and ensure Maps JavaScript API is enabled.')
+    }
+
     document.head.appendChild(script)
   }, [])
 
