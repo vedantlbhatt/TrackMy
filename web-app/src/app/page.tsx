@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { Map } from '../components/Map'
-import { ReportList } from '../components/ReportList'
 import { CreateReportModal } from '../components/CreateReportModal'
 import { BountyClaimModal } from '../components/BountyClaimModal'
+import Navigation from '../components/Navigation'
+import HeroSection from '../components/HeroSection'
+import ReportCard from '../components/ReportCard'
 import { userApi } from '../lib/api'
 
-import { MapPin, Plus } from 'lucide-react'
+import { MapPin, Search, TrendingUp, Users, Award } from 'lucide-react'
 
 interface User {
   user_id: number
@@ -82,78 +84,85 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <MapPin className="h-8 w-8 text-blue-600" />
-              <h1 className="ml-2 text-2xl font-bold text-gray-900">TrackMy</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Report Lost Item
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%)'}}>
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Hero Section */}
+      <HeroSection />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Map */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border h-96">
-              <Map
-                reports={reports}
-                onReportClick={handleReportClick}
-              />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Users className="h-8 w-8 text-blue-600" />
             </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">10K+ Users</h3>
+            <p className="text-gray-600">Active community members</p>
           </div>
-
-          {/* Reports List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Lost Items</h2>
-                <p className="text-sm text-gray-600">Click on a report to view details</p>
-              </div>
-              <ReportList
-                reports={reports}
-                onReportClick={handleReportClick}
-                onClaimBounty={handleClaimBounty}
-                selectedReport={selectedReport}
-              />
+          
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Award className="h-8 w-8 text-green-600" />
             </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">2.5K+ Found</h3>
+            <p className="text-gray-600">Items successfully reunited</p>
+          </div>
+          
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="h-8 w-8 text-yellow-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">95% Success</h3>
+            <p className="text-gray-600">Rate of successful matches</p>
           </div>
         </div>
 
-        {/* Selected Report Details */}
-        {selectedReport && (
-          <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-xl font-semibold text-gray-900">{selectedReport.title}</h3>
-            <p className="text-gray-600 mt-2">{selectedReport.description}</p>
-            {selectedReport.bounty > 0 && (
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-lg font-semibold text-green-600">
-                  Bounty: ${selectedReport.bounty}
-                </span>
-                <button
-                  onClick={() => handleClaimBounty(selectedReport)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                >
-                  Claim Bounty
-                </button>
-              </div>
-            )}
+        {/* Recent Reports */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Recent Reports</h2>
+            <button className="btn-primary">
+              <Search className="h-5 w-5 mr-2" />
+              View All
+            </button>
           </div>
-        )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reports.slice(0, 6).map((report) => (
+              <ReportCard
+                key={report.id}
+                report={{
+                  ...report,
+                  status: 'lost',
+                  createdAt: new Date().toISOString()
+                }}
+                onViewDetails={handleReportClick}
+                onClaimBounty={handleClaimBounty}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Map Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Live Map</h2>
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              <span className="text-gray-600">{reports.length} active reports</span>
+            </div>
+          </div>
+          
+          <div className="map-container h-96">
+            <Map
+              reports={reports}
+              onReportClick={handleReportClick}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
