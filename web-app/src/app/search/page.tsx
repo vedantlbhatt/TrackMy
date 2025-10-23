@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, MapPin, Clock, DollarSign, Grid, List } from 'lucide-react'
+import { Search, MapPin, DollarSign, Grid, List } from 'lucide-react'
 import ReportCard from '@/components/ReportCard'
 
 export default function SearchPage() {
@@ -88,11 +88,11 @@ export default function SearchPage() {
     }, 1000)
   }, [])
 
-  const handleViewDetails = (report: any) => {
+  const handleViewDetails = (report: {id: number, title: string, description: string, bounty: number}) => {
     console.log('View details for:', report)
   }
 
-  const handleClaimBounty = (report: any) => {
+  const handleClaimBounty = (report: {id: number, title: string, description: string, bounty: number}) => {
     console.log('Claim bounty for:', report)
   }
 

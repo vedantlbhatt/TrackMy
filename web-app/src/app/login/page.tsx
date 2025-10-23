@@ -28,7 +28,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { data, error } = await signIn(formData.email, formData.password)
+      const { error } = await signIn(formData.email, formData.password)
       
       if (error) {
         // Handle specific error messages

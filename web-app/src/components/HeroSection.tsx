@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, MapPin, Clock, Shield, Users, Award } from 'lucide-react'
+import { Search, MapPin, Shield, Users, Award } from 'lucide-react'
 
 export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState('')

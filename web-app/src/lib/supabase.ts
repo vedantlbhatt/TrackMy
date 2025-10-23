@@ -111,7 +111,7 @@ export const db = {
   },
 
   // Update user profile
-  updateProfile: async (userId: string, updates: any) => {
+  updateProfile: async (userId: string, updates: Record<string, unknown>) => {
     if (!supabase) {
       return { data: null, error: { message: 'Supabase not configured' } }
     }
@@ -124,7 +124,7 @@ export const db = {
   },
 
   // Create user profile
-  createProfile: async (userId: string, profileData: any) => {
+  createProfile: async (userId: string, profileData: Record<string, unknown>) => {
     if (!supabase) {
       return { data: null, error: { message: 'Supabase not configured' } }
     }

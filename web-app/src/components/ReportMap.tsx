@@ -89,10 +89,12 @@ export function ReportMap({ latitude, longitude, radius, onLocationChange, onRad
       setIsMapReady(true)
 
       // Add click listener
-      mapInstance.addListener('click', (event: any) => {
-        const lat = event.latLng.lat()
-        const lng = event.latLng.lng()
-        onLocationChange(lat, lng)
+      mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
+        if (event.latLng) {
+          const lat = event.latLng.lat()
+          const lng = event.latLng.lng()
+          onLocationChange(lat, lng)
+        }
       })
     }
   }, [latitude, longitude, onLocationChange])
@@ -148,10 +150,12 @@ export function ReportMap({ latitude, longitude, radius, onLocationChange, onRad
       setPulseCircles(newPulseCircles)
 
       // Add drag listener to marker
-      newMarker.addListener('drag', (event: any) => {
-        const lat = event.latLng.lat()
-        const lng = event.latLng.lng()
-        onLocationChange(lat, lng)
+      newMarker.addListener('drag', (event: google.maps.MapMouseEvent) => {
+        if (event.latLng) {
+          const lat = event.latLng.lat()
+          const lng = event.latLng.lng()
+          onLocationChange(lat, lng)
+        }
       })
     }
   }, [map, isMapReady, latitude, longitude, radius, onLocationChange])

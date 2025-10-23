@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { Map } from '../components/Map'
-import { ReportList } from '../components/ReportList'
 import { CreateReportModal } from '../components/CreateReportModal'
 import { BountyClaimModal } from '../components/BountyClaimModal'
 import HeroSection from '../components/HeroSection'
 import ReportCard from '../components/ReportCard'
 import { userApi } from '../lib/api'
 
-import { MapPin, Plus, Search, TrendingUp, Users, Award } from 'lucide-react'
+import { MapPin, Search, TrendingUp, Users, Award } from 'lucide-react'
 
 interface User {
   user_id: number
