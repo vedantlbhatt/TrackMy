@@ -16,8 +16,8 @@ interface ReportCardProps {
     status?: 'lost' | 'found' | 'pending'
     imageUrl?: string
   }
-  onViewDetails?: (report: any) => void
-  onClaimBounty?: (report: any) => void
+  onViewDetails?: (report: {id: number, title: string, description: string, bounty: number}) => void
+  onClaimBounty?: (report: {id: number, title: string, description: string, bounty: number}) => void
 }
 
 export default function ReportCard({ report, onViewDetails, onClaimBounty }: ReportCardProps) {

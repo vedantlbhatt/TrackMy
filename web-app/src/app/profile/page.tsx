@@ -9,9 +9,9 @@ export default function ProfilePage() {
   const { user: authUser, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
   const [isEditing, setIsEditing] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [userReports, setUserReports] = useState<any[]>([])
-  const [userFoundReports, setUserFoundReports] = useState<any[]>([])
+  const [user, setUser] = useState<{user_id: number, user_name: string, email: string, created_at: string} | null>(null)
+  const [userReports, setUserReports] = useState<{lost_report_id: number, title: string, description: string, bounty: number}[]>([])
+  const [userFoundReports, setUserFoundReports] = useState<{found_report_id: number, title: string, description: string}[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
