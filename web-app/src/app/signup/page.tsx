@@ -64,7 +64,7 @@ export default function SignupPage() {
         setError(error.message)
       } else {
         // Check if email confirmation is required
-        if (data.user && !data.user.email_confirmed_at) {
+        if (data?.user && !data.user.email_confirmed_at) {
           setSuccess(true)
           setError('Please check your email and click the confirmation link to complete signup.')
         } else {

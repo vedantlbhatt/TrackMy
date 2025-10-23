@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MapPin, Clock, DollarSign, Eye, MessageCircle, Share2, Heart } from 'lucide-react'
+import Image from 'next/image'
 
 interface ReportCardProps {
   report: {
@@ -16,8 +17,8 @@ interface ReportCardProps {
     status?: 'lost' | 'found' | 'pending'
     imageUrl?: string
   }
-  onViewDetails?: (report: {id: number, title: string, description: string, bounty: number}) => void
-  onClaimBounty?: (report: {id: number, title: string, description: string, bounty: number}) => void
+  onViewDetails?: (report: {id: number, title: string, description: string, bounty: number, latitude: number, longitude: number, radius: number}) => void
+  onClaimBounty?: (report: {id: number, title: string, description: string, bounty: number, latitude: number, longitude: number, radius: number}) => void
 }
 
 export default function ReportCard({ report, onViewDetails, onClaimBounty }: ReportCardProps) {
@@ -69,9 +70,11 @@ export default function ReportCard({ report, onViewDetails, onClaimBounty }: Rep
         {/* Image placeholder */}
         {report.imageUrl ? (
           <div className="w-20 h-20 rounded-xl overflow-hidden ml-4">
-            <img 
+            <Image 
               src={report.imageUrl} 
               alt={report.title}
+              width={80}
+              height={80}
               className="w-full h-full object-cover"
             />
           </div>

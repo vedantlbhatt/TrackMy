@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { User, Settings, Bell, Shield, MapPin, Clock, DollarSign, Edit, Camera, LogOut } from 'lucide-react'
 import { userApi } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
+import Image from 'next/image'
 
 export default function ProfilePage() {
   const { user: authUser, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
   const [isEditing, setIsEditing] = useState(false)
-  const [user, setUser] = useState<{user_id: number, user_name: string, email: string, created_at: string} | null>(null)
-  const [userReports, setUserReports] = useState<{lost_report_id: number, title: string, description: string, bounty: number}[]>([])
+  const [user, setUser] = useState<{user_id: number, user_name: string, email: string, created_at: string, avatar?: string, phone?: string} | null>(null)
+  const [userReports, setUserReports] = useState<{lost_report_id: number, title: string, description: string, bounty: number, created_at: string}[]>([])
   const [userFoundReports, setUserFoundReports] = useState<{found_report_id: number, title: string, description: string}[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -136,7 +137,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                   {user?.avatar ? (
-                    <img src={user.avatar} alt={user.user_name || 'User'} className="w-24 h-24 rounded-full object-cover" />
+                    <Image src={user.avatar} alt={user.user_name || 'User'} width={96} height={96} className="w-24 h-24 rounded-full object-cover" />
                   ) : (
                     <User className="h-12 w-12 text-white" />
                   )}
@@ -376,7 +377,7 @@ export default function ProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input
                       type="text"
-                      value={user.name}
+                      value={user?.user_name || ''}
                       className="input-field"
                       disabled={!isEditing}
                     />
@@ -385,7 +386,7 @@ export default function ProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
-                      value={user.email}
+                      value={user?.email || ''}
                       className="input-field"
                       disabled={!isEditing}
                     />
@@ -394,7 +395,7 @@ export default function ProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                     <input
                       type="tel"
-                      value={user.phone}
+                      value={user?.phone || ''}
                       className="input-field"
                       disabled={!isEditing}
                     />
