@@ -15,7 +15,11 @@ api.interceptors.request.use(async (config) => {
   try {
     // Only run in browser environment and if supabase is available
     if (typeof window !== 'undefined' && supabase) {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn('Session error:', error.message);
+        return config; // Continue without auth token
+      }
       if (session?.access_token) {
         config.headers.Authorization = `Bearer ${session.access_token}`;
       }

@@ -1,7 +1,7 @@
 import { createClient, Session } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zfrqgpyspgmuzpxijmhh.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxYnpvcmRubWdmb3loeXRiZ2hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTE5MDYsImV4cCI6MjA3Mzk4NzkwNn0.3FElNS91vf7OD8v7O7sf5elM06HhyUUgCe1XUU93bag'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxYnpvcmRubWdmb3loeXRiZ2hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTE5MDYsImV4cCI6MjA3Mzk4NzkwNn0.3FElNS91vf7OD8v7O7sf5elM06HhyUUgCe1XUU53bag'
 
 // Create Supabase client - works in both browser and server
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
