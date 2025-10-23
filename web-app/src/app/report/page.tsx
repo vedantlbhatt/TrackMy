@@ -2,9 +2,12 @@
 
 import { useState } from 'react'
 import { MapPin, Camera, DollarSign, AlertCircle, CheckCircle, Upload } from 'lucide-react'
-import { Map } from '../../components/Map'
+import { ReportMap } from '../../components/ReportMap'
+import { userApi } from '../../lib/api'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function ReportPage() {
+  const { user } = useAuth()
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost')
   const [formData, setFormData] = useState({
     title: '',
@@ -20,6 +23,9 @@ export default function ReportPage() {
   })
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [submittedReportId, setSubmittedReportId] = useState<number | null>(null)
 
   const categories = [
     'Electronics', 'Clothing', 'Accessories', 'Documents', 
@@ -44,11 +50,54 @@ export default function ReportPage() {
   }
 
   const handleSubmit = async () => {
+    if (!user) {
+      setSubmitError('You must be logged in to submit a report')
+      return
+    }
+
     setIsSubmitting(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsSubmitting(false)
-    // Handle success
+    setSubmitError(null)
+
+    try {
+      // For now, use a default user_id since we're using Supabase auth
+      // In a real app, you'd need to map Supabase user to your backend user
+      const userId = 1 // This should be mapped from Supabase user
+      
+      const reportData = {
+        user_id: userId,
+        item_id: 1, // Default item ID for now
+        title: formData.title,
+        description: formData.description,
+        longitude: formData.longitude,
+        latitude: formData.latitude,
+        radius: formData.radius,
+        bounty: formData.bounty,
+      }
+
+      let response;
+      if (reportType === 'lost') {
+        response = await userApi.createLostReport(reportData)
+      } else {
+        response = await userApi.createFoundReport({
+          founder_id: userId,
+          item_id: 1,
+          title: formData.title,
+          description: formData.description,
+          longitude: formData.longitude,
+          latitude: formData.latitude,
+          radius: formData.radius,
+        })
+      }
+
+      // Success - show success state
+      setSubmittedReportId(response.data.lost_report_id || response.data.found_report_id)
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error('Failed to submit report:', error)
+      setSubmitError('Failed to submit report. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const nextStep = () => {
@@ -59,21 +108,92 @@ export default function ReportPage() {
     if (currentStep > 1) setCurrentStep(currentStep - 1)
   }
 
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      category: '',
+      location: '',
+      latitude: 0,
+      longitude: 0,
+      radius: 100,
+      bounty: 0,
+      contactInfo: '',
+      images: []
+    })
+    setCurrentStep(1)
+    setIsSubmitted(false)
+    setSubmittedReportId(null)
+    setSubmitError(null)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Success State */}
+        {isSubmitted && (
+          <div className="text-center mb-8">
+            <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl mx-auto">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Report Submitted Successfully!
+              </h1>
+              <p className="text-xl text-gray-600 mb-6">
+                Your {reportType} item report has been submitted and is now live on the platform.
+              </p>
+              <div className="bg-gray-50 rounded-xl p-6 mb-8">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">Report ID:</span>
+                  <span className="text-gray-900 font-mono">#{submittedReportId}</span>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">Type:</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    reportType === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                  }`}>
+                    {reportType === 'lost' ? 'Lost Item' : 'Found Item'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-700">Title:</span>
+                  <span className="text-gray-900">{formData.title}</span>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={resetForm}
+                  className="btn-primary"
+                >
+                  Submit Another Report
+                </button>
+                <button
+                  onClick={() => window.location.href = '/'}
+                  className="btn-secondary"
+                >
+                  Back to Home
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {reportType === 'lost' ? 'Report Lost Item' : 'Report Found Item'}
-          </h1>
-          <p className="text-xl text-gray-600">
-            Help us connect items with their owners
-          </p>
-        </div>
+        {!isSubmitted && (
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              {reportType === 'lost' ? 'Report Lost Item' : 'Report Found Item'}
+            </h1>
+            <p className="text-xl text-gray-600">
+              Help us connect items with their owners
+            </p>
+          </div>
+        )}
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        {!isSubmitted && (
+          <div className="mb-8">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">
@@ -101,9 +221,11 @@ export default function ReportPage() {
             ))}
           </div>
         </div>
+        )}
 
         {/* Form Content */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        {!isSubmitted && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Step 1: Report Type */}
           {currentStep === 1 && (
             <div className="animate-fadeInUp">
@@ -245,29 +367,50 @@ export default function ReportPage() {
                 <div className="bg-blue-50 rounded-xl p-6">
                   <div className="flex items-center mb-4">
                     <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                    <h3 className="font-semibold text-blue-900">Map Location</h3>
+                    <h3 className="font-semibold text-blue-900">Select Location on Map</h3>
                   </div>
-                  <div className="h-64 rounded-lg overflow-hidden">
-                    <Map 
-                      reports={[]} 
-                      onReportClick={() => {}} 
+                  <div className="h-96 rounded-lg overflow-hidden">
+                    <ReportMap 
+                      latitude={formData.latitude}
+                      longitude={formData.longitude}
+                      radius={formData.radius}
+                      onLocationChange={(lat, lng) => {
+                        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))
+                      }}
+                      onRadiusChange={(newRadius) => {
+                        setFormData(prev => ({ ...prev, radius: newRadius }))
+                      }}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search Radius (meters)
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Search Radius: {formData.radius}m
                     </label>
-                    <input
-                      type="number"
-                      value={formData.radius}
-                      onChange={(e) => handleInputChange('radius', parseInt(e.target.value))}
-                      className="input-field"
-                      min="10"
-                      max="1000"
-                    />
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="10"
+                        max="1000"
+                        step="10"
+                        value={formData.radius}
+                        onChange={(e) => {
+                          const newRadius = parseInt(e.target.value)
+                          handleInputChange('radius', newRadius)
+                        }}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #007AFF 0%, #007AFF ${((formData.radius - 10) / (1000 - 10)) * 100}%, #e5e7eb ${((formData.radius - 10) / (1000 - 10)) * 100}%, #e5e7eb 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>10m</span>
+                        <span>500m</span>
+                        <span>1000m</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -321,6 +464,15 @@ export default function ReportPage() {
           {currentStep === 5 && (
             <div className="animate-fadeInUp">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Review Your Report</h2>
+              
+              {submitError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                    <span className="text-red-800">{submitError}</span>
+                  </div>
+                </div>
+              )}
               <div className="bg-gray-50 rounded-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray-700">Type:</span>
@@ -384,6 +536,7 @@ export default function ReportPage() {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   )
